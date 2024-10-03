@@ -132,7 +132,7 @@ fun DynamicDisplay(card: Pair<Card, Int>) {
     Card.FINISH -> Finish()
     Card.DESERT_JUNGLE -> DesertJungle()
     Card.DESERT_SWAMP -> DesertSwamp()
-    Card.MOUNTAIN -> Mountain()
+    Card.MOUNTAIN -> Mountain(card.second)
     Card.MOUNTAIN_DESERT -> MountainDesert()
     Card.MOUNTAIN_JUNGLE -> MountainJungle()
     Card.MOUNTAIN_SWAMP -> MountainSwamp()
@@ -148,7 +148,7 @@ fun Swamp(gen: Int = 1) {
 
 @Preview
 @Composable
-fun Mountain(gen: Int = 1) {
+fun Mountain(gen: Int = 2) {
   SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg", generation = gen)
 }
 
@@ -318,7 +318,7 @@ enum class Card {
 
 class Deck {
   private val firstColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.MOUNTAIN, Card.DESERT)
-  private val secondColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.MOUNTAIN, Card.DESERT, Card.COAST)
+  private val secondColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.DESERT, Card.COAST, Card.MOUNTAIN)
   private val thirdColors = mutableListOf(Card.MOUNTAIN_DESERT, Card.SWAMP_JUNGLE, Card.DESERT_JUNGLE, Card.MOUNTAIN_JUNGLE, Card.DESERT_SWAMP, Card.MOUNTAIN_SWAMP)
 
   init {
