@@ -2,7 +2,6 @@ package com.example.invader
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.graphics.Paint.Align
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,47 +13,56 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.invader.ui.theme.InvaderTheme
-import java.util.Stack
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.toPath
+import com.example.compose.AppTheme
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-
     setContent {
-      InvaderTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          Invader(Deck())
+      AppTheme {
+        Surface(
+          modifier = Modifier.fillMaxSize(),
+        ) {
+          Invader()
         }
       }
     }
   }
 }
 
+@Preview
 @Composable
-fun Invader(deck: Deck) {
+fun Invader() {
+  val deck = remember { mutableStateOf(Deck()) }
+  val counter = remember { mutableIntStateOf(15) }
   val discardCard = remember { mutableStateOf(Card.EMPTY to 0) }
   val ravageCard = remember { mutableStateOf(Card.EMPTY to 0) }
   val exploreCard = remember { mutableStateOf(Card.EMPTY to 0) }
@@ -69,20 +77,72 @@ fun Invader(deck: Deck) {
     modifier = Modifier.fillMaxSize()
   ) {
     Discard(card = discardCard.value)
+    Splitter(color = MaterialTheme.colorScheme.primary)
     Ravage(card = ravageCard.value)
+    Splitter(color = MaterialTheme.colorScheme.primary)
     Building(card = buildingCard.value)
-    Explore(card = exploreCard.value) {
-      if (exploreCard.value.first == Card.EMPTY) {
-        exploreCard.value = deck.next()
-      } else if (exploreCard.value.first != Card.FINISH) {
-        discardCard.value = ravageCard.value
-        ravageCard.value = buildingCard.value
-        buildingCard.value = exploreCard.value
-        exploreCard.value = Card.EMPTY to 0
+    Splitter(color = MaterialTheme.colorScheme.primary)
+    Column {
+      Box(
+        modifier = Modifier.weight(1f, true).width(120.dp),
+        contentAlignment = Alignment.BottomCenter,
+      ){
+        Text(text = "${counter.intValue}")
+      }
+      Explore(card = exploreCard.value) {
+        if (exploreCard.value.first == Card.EMPTY) {
+          exploreCard.value = deck.value.next()
+          counter.intValue -= 1
+        } else if (exploreCard.value.first != Card.FINISH) {
+          discardCard.value = ravageCard.value
+          ravageCard.value = buildingCard.value
+          buildingCard.value = exploreCard.value
+          exploreCard.value = Card.EMPTY to 0
+        }
+      }
+      Column(
+        modifier = Modifier.weight(1f, true),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+      ) {
+        Button(
+          onClick = {
+            deck.value = Deck()
+            exploreCard.value = Card.EMPTY to 0
+            discardCard.value = Card.EMPTY to 0
+            ravageCard.value = Card.EMPTY to 0
+            buildingCard.value = Card.EMPTY to 0
+            counter.intValue = 15
+          }) {
+          Text("Neues Spiel")
+        }
       }
     }
   }
 }
+
+
+@Preview
+@Composable
+fun Splitter(width: Dp = 20.dp, color: Color = Color.Black) {
+  Column() {
+    Box(modifier = Modifier
+      .drawWithCache {
+        val h = size.height
+        val w = size.width
+        val start = (h - 2 * w) / 2
+        val r = RoundedPolygon(vertices = floatArrayOf(w, 1f * start, 0f, 0.5f * h, w, w + w + start, w, w + w + start - 0.1f * w, 0.11f * w, 0.5f * h, w, start + 0.1f * w))
+        val roundedPolygonPath = r
+          .toPath()
+          .asComposePath()
+        onDrawBehind { drawPath(roundedPolygonPath, color = color) }
+      }
+      .width(width)
+      .height(width * 2))
+    Text(text = "")
+  }
+}
+
 
 @Composable
 fun Building(card: Pair<Card, Int>) {
@@ -224,13 +284,13 @@ fun SwampJungle() {
 fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String) {
   Card(
     border = BorderStroke(2.dp, Color.Black),
-    modifier = Modifier.size(width = 100.dp, height = 180.dp),
+    modifier = Modifier.size(width = 120.dp, height = 200.dp),
     colors = CardDefaults.cardColors(
       containerColor = color1
     )
   ) {
     Box(contentAlignment = Alignment.Center) {
-      Column() {
+      Column {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
           verticalArrangement = Arrangement.Center,
@@ -264,7 +324,7 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null) {
     colors = CardDefaults.cardColors(
       containerColor = color
     ),
-    modifier = Modifier.size(width = 100.dp, height = 180.dp),
+    modifier = Modifier.size(width = 120.dp, height = 200.dp),
   ) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -285,11 +345,6 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null) {
   }
 }
 
-@Preview
-@Composable
-fun InvaderPreview() {
-  Invader(Deck())
-}
 
 enum class CardColor(val color: Color) {
   SWAMP(Color(0, 200, 200)),
