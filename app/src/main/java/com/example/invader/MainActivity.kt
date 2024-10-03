@@ -2,6 +2,7 @@ package com.example.invader
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.graphics.Paint.Align
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,9 +10,13 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.invader.ui.theme.InvaderTheme
+import java.util.Stack
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,10 +55,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Invader(deck: Deck) {
-  val discardCard = remember { mutableStateOf(Card.EMPTY) }
-  val ravageCard = remember { mutableStateOf(Card.EMPTY) }
-  val exploreCard = remember { mutableStateOf(Card.EMPTY) }
-  val buildingCard = remember { mutableStateOf(Card.EMPTY) }
+  val discardCard = remember { mutableStateOf(Card.EMPTY to 0) }
+  val ravageCard = remember { mutableStateOf(Card.EMPTY to 0) }
+  val exploreCard = remember { mutableStateOf(Card.EMPTY to 0) }
+  val buildingCard = remember { mutableStateOf(Card.EMPTY to 0) }
 
   val activity = LocalContext.current as Activity
   activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -65,21 +71,21 @@ fun Invader(deck: Deck) {
     Discard(card = discardCard.value)
     Ravage(card = ravageCard.value)
     Building(card = buildingCard.value)
-    Explore(card = exploreCard.value, onClick = {
-      if (exploreCard.value == Card.EMPTY) {
+    Explore(card = exploreCard.value) {
+      if (exploreCard.value.first == Card.EMPTY) {
         exploreCard.value = deck.next()
-      } else if (exploreCard.value != Card.FINISH) {
+      } else if (exploreCard.value.first != Card.FINISH) {
         discardCard.value = ravageCard.value
         ravageCard.value = buildingCard.value
         buildingCard.value = exploreCard.value
-        exploreCard.value = Card.EMPTY
+        exploreCard.value = Card.EMPTY to 0
       }
-    })
+    }
   }
 }
 
 @Composable
-fun Building(card: Card) {
+fun Building(card: Pair<Card, Int>) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     DynamicDisplay(card = card)
     Text(text = "Bauen")
@@ -87,7 +93,7 @@ fun Building(card: Card) {
 }
 
 @Composable
-fun Ravage(card: Card) {
+fun Ravage(card: Pair<Card, Int>) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     DynamicDisplay(card = card)
     Text(text = "Wüten")
@@ -95,7 +101,7 @@ fun Ravage(card: Card) {
 }
 
 @Composable
-fun Explore(card: Card, onClick: () -> Unit) {
+fun Explore(card: Pair<Card, Int>, onClick: () -> Unit) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
     modifier = Modifier.clickable(onClick = onClick)
@@ -106,7 +112,7 @@ fun Explore(card: Card, onClick: () -> Unit) {
 }
 
 @Composable
-fun Discard(card: Card) {
+fun Discard(card: Pair<Card, Int>) {
   Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(180.dp)) {
     Column(modifier = Modifier.rotate(-90f)) {
       DynamicDisplay(card = card)
@@ -116,13 +122,13 @@ fun Discard(card: Card) {
 }
 
 @Composable
-fun DynamicDisplay(card: Card) {
-  when (card) {
+fun DynamicDisplay(card: Pair<Card, Int>) {
+  when (card.first) {
     Card.EMPTY -> Empty()
-    Card.SWAMP -> Swamp()
-    Card.COAST -> Coast()
-    Card.DESERT -> Desert()
-    Card.JUNGLE -> Jungle()
+    Card.SWAMP -> Swamp(card.second)
+    Card.COAST -> Coast(card.second)
+    Card.DESERT -> Desert(card.second)
+    Card.JUNGLE -> Jungle(card.second)
     Card.FINISH -> Finish()
     Card.DESERT_JUNGLE -> DesertJungle()
     Card.DESERT_SWAMP -> DesertSwamp()
@@ -136,32 +142,32 @@ fun DynamicDisplay(card: Card) {
 
 @Preview
 @Composable
-fun Swamp() {
-  SingleDisplayCard(color = CardColor.SWAMP.color, text = "Sumpf")
+fun Swamp(gen: Int = 1) {
+  SingleDisplayCard(color = CardColor.SWAMP.color, text = "Sumpf", generation = gen)
 }
 
 @Preview
 @Composable
-fun Mountain() {
-  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg")
+fun Mountain(gen: Int = 1) {
+  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg", generation = gen)
 }
 
 @Preview
 @Composable
-fun Desert() {
-  SingleDisplayCard(color = CardColor.DESERT.color, text = "Wüste")
+fun Desert(gen: Int = 1) {
+  SingleDisplayCard(color = CardColor.DESERT.color, text = "Wüste", generation = gen)
 }
 
 @Preview
 @Composable
-fun Jungle() {
-  SingleDisplayCard(color = CardColor.JUNGLE.color, text = "Dschungel")
+fun Jungle(gen: Int = 1) {
+  SingleDisplayCard(color = CardColor.JUNGLE.color, text = "Dschungel", generation = gen)
 }
 
 @Preview
 @Composable
-fun Coast() {
-  SingleDisplayCard(color = CardColor.COAST.color, text = "Küste")
+fun Coast(gen: Int = 1) {
+  SingleDisplayCard(color = CardColor.COAST.color, text = "Küste", generation = gen)
 }
 
 @Preview
@@ -223,30 +229,36 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
       containerColor = color1
     )
   ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier
-        .height(90.dp)
-        .fillMaxSize()
-        .background(color1)
-    ) {
-      Text(text1)
-    }
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
-      modifier = Modifier
-        .fillMaxSize()
-        .background(color2)
-    ) {
-      Text(text2)
+    Box(contentAlignment = Alignment.Center) {
+      Column() {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier
+            .weight(1f, true)
+            .fillMaxWidth()
+            .background(color1)
+        ) {
+          Text(text1)
+        }
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier
+            .weight(1f, true)
+            .fillMaxWidth()
+            .background(color2)
+        ) {
+          Text(text2)
+        }
+      }
+      Text(text = "III")
     }
   }
 }
 
 @Composable
-fun SingleDisplayCard(color: Color, text: String) {
+fun SingleDisplayCard(color: Color, text: String, generation: Int? = null) {
   Card(
     border = BorderStroke(2.dp, Color.Black),
     colors = CardDefaults.cardColors(
@@ -256,10 +268,19 @@ fun SingleDisplayCard(color: Color, text: String) {
   ) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center,
+      verticalArrangement = Arrangement.SpaceBetween,
       modifier = Modifier.fillMaxSize()
     ) {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier.height(50.dp)
+      ) {
+        if (generation != null)
+          Text(text = if (generation == 1) "I" else "II")
+      }
       Text(text)
+      Spacer(modifier = Modifier.height(50.dp))
     }
   }
 }
@@ -306,13 +327,13 @@ class Deck {
     thirdColors.shuffle()
   }
 
-  fun next(): Card {
+  fun next(): Pair<Card, Int> {
     if (firstColors.size > 0)
-      return firstColors.removeFirst()
+      return firstColors.removeFirst() to 1
     if (secondColors.size > 0)
-      return secondColors.removeFirst()
+      return secondColors.removeFirst() to 2
     if (thirdColors.size > 0)
-      return thirdColors.removeFirst()
-    return Card.FINISH
+      return thirdColors.removeFirst() to 3
+    return Card.FINISH to 0
   }
 }
