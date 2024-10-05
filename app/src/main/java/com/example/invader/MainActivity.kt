@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
         ) {
           val screen = remember { mutableStateOf(Screens.Invaders) }
           val deck = remember { mutableStateOf(Deck()) }
-          val counter = remember { mutableIntStateOf(15) }
+          val counter = remember { mutableIntStateOf(12) }
           val discardCard = remember { mutableStateOf(Card.EMPTY to 0) }
           val ravageCard = remember { mutableStateOf(Card.EMPTY to 0) }
           val exploreCard = remember { mutableStateOf(Card.EMPTY to 1) }
@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
             discardCard.value = Card.EMPTY to 0
             ravageCard.value = Card.EMPTY to 0
             buildingCard.value = Card.EMPTY to 0
-            counter.intValue = 15
+            counter.intValue = 12
           }
 
           Scaffold(

@@ -435,21 +435,21 @@ class Deck {
   }
 
   fun next(): Pair<Card, Int> {
-    if (firstColors.size > 0)
+    if (firstColors.size > 1)
       return firstColors.removeFirst() to 1
-    if (secondColors.size > 0)
+    if (secondColors.size > 1)
       return secondColors.removeFirst() to 2
-    if (thirdColors.size > 0)
+    if (thirdColors.size > 1)
       return thirdColors.removeFirst() to 3
     return Card.FINISH to 0
   }
 
   fun nextGen(): Int {
-    if (firstColors.size > 0)
+    if (firstColors.size > 1)
       return 1
-    if (secondColors.size > 0)
+    if (secondColors.size > 1)
       return 2
-    if (thirdColors.size > 0)
+    if (thirdColors.size > 1)
       return 3
     return 0
   }
