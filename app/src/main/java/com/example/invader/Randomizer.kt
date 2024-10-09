@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -89,7 +90,7 @@ fun Randomizer() {
 @Preview
 @Composable
 fun MapPreview() {
-  Map(listOf(Map.A, Map.B), Orientation.Down)
+  Map(listOf(Map.A, Map.B, Map.C), Orientation.Down)
 }
 
 @Composable
@@ -100,11 +101,11 @@ fun Map(maps: List<Map>, orientation: Orientation) {
     modifier = Modifier.size(300.dp, 300.dp)
   )
   {
-    items(maps) { map ->
+    itemsIndexed(maps) { i, map ->
       Box(
         modifier = Modifier
           .size(90.dp, 90.dp)
-          .rotate(if (orientation == Orientation.Down) -180f else 0f)
+          .rotate(if (orientation == Orientation.Down && i % 2 == 0) -180f else 0f)
           .padding(5.dp),
         contentAlignment = Alignment.Center
       ) {
