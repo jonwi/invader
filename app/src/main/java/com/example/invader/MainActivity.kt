@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     Icon(
                       Icons.Filled.Refresh,
                       contentDescription = "Randomize",
-                      tint = if (screen.value == Screens.Randomizer) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                      tint = if (screen.value == Screens.Randomizer) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
                     )
                   }
                   IconButton(
@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
                     Icon(
                       Icons.Filled.Home,
                       contentDescription = "Invaders",
-                      tint = if (screen.value == Screens.Invaders) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                      tint = if (screen.value == Screens.Invaders) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
                     )
                   }
                 }

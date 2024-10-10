@@ -3,6 +3,7 @@ package com.example.invader
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -29,9 +31,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -217,6 +223,10 @@ fun DynamicDisplay(card: Pair<Card, Int>) {
     Card.COAST -> Coast(card.second)
     Card.DESERT -> Desert(card.second)
     Card.JUNGLE -> Jungle(card.second)
+    Card.SWAMP_NATION -> Swamp(card.second, nation = true)
+    Card.MOUNTAIN_NATION -> Mountain(card.second, nation = true)
+    Card.DESERT_NATION -> Desert(card.second, nation = true)
+    Card.JUNGLE_NATION -> Jungle(card.second, nation = true)
     Card.FINISH -> Finish()
     Card.DESERT_JUNGLE -> DesertJungle()
     Card.DESERT_SWAMP -> DesertSwamp()
@@ -230,26 +240,26 @@ fun DynamicDisplay(card: Pair<Card, Int>) {
 
 @Preview
 @Composable
-fun Swamp(gen: Int = 1) {
-  SingleDisplayCard(color = CardColor.SWAMP.color, text = "Sumpf", generation = gen)
+fun Swamp(gen: Int = 1, nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.SWAMP.color, text = "Sumpf", generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
-fun Mountain(gen: Int = 2) {
-  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg", generation = gen)
+fun Mountain(gen: Int = 2, nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg", generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
-fun Desert(gen: Int = 1) {
-  SingleDisplayCard(color = CardColor.DESERT.color, text = "Wüste", generation = gen)
+fun Desert(gen: Int = 1, nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.DESERT.color, text = "Wüste", generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
-fun Jungle(gen: Int = 1) {
-  SingleDisplayCard(color = CardColor.JUNGLE.color, text = "Dschungel", generation = gen)
+fun Jungle(gen: Int = 1, nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.JUNGLE.color, text = "Dschungel", generation = gen, nation = nation)
 }
 
 @Preview
@@ -370,7 +380,7 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
 }
 
 @Composable
-fun SingleDisplayCard(color: Color, text: String, generation: Int? = null) {
+fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, nation: Boolean = false) {
   Card(
     border = BorderStroke(2.dp, Color.Black),
     colors = CardDefaults.cardColors(
@@ -392,7 +402,25 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null) {
           Text(text = if (generation == 1) "I" else "II")
       }
       Text(text)
-      Spacer(modifier = Modifier.height(50.dp))
+      if (nation)
+        Box(modifier = Modifier.height(50.dp), contentAlignment = Alignment.Center) {
+          Image(
+            painter = painterResource(id = R.drawable.nation),
+            contentDescription = "Empty",
+            contentScale = ContentScale.FillHeight,
+            modifier = Modifier.padding(5.dp).size(20.dp, 20.dp).blur(5.dp, BlurredEdgeTreatment.Unbounded),
+            colorFilter = ColorFilter.tint(Color.White),
+
+          )
+          Image(
+            painter = painterResource(id = R.drawable.nation),
+            contentDescription = "Empty",
+            contentScale = ContentScale.FillHeight,
+            modifier = Modifier.padding(5.dp).size(20.dp, 20.dp)
+          )
+        }
+      else
+        Spacer(modifier = Modifier.height(50.dp))
     }
   }
 }
@@ -413,6 +441,10 @@ enum class Card {
   JUNGLE,
   MOUNTAIN,
   DESERT,
+  SWAMP_NATION,
+  JUNGLE_NATION,
+  MOUNTAIN_NATION,
+  DESERT_NATION,
   MOUNTAIN_DESERT,
   SWAMP_JUNGLE,
   DESERT_JUNGLE,
@@ -425,7 +457,7 @@ enum class Card {
 
 class Deck {
   private val firstColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.MOUNTAIN, Card.DESERT)
-  private val secondColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.DESERT, Card.COAST, Card.MOUNTAIN)
+  private val secondColors = mutableListOf(Card.SWAMP_NATION, Card.JUNGLE_NATION, Card.DESERT_NATION, Card.COAST, Card.MOUNTAIN_NATION)
   private val thirdColors = mutableListOf(Card.MOUNTAIN_DESERT, Card.SWAMP_JUNGLE, Card.DESERT_JUNGLE, Card.MOUNTAIN_JUNGLE, Card.DESERT_SWAMP, Card.MOUNTAIN_SWAMP)
 
   init {
