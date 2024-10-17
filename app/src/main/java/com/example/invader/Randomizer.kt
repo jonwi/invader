@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.max
 import kotlin.math.min
 
 @Preview
@@ -74,7 +75,7 @@ fun Randomizer() {
         Text(stringResource(R.string.easy))
       }
       Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { num.intValue = min(0, num.intValue - 1) }) {
+        IconButton(onClick = { num.intValue = max(1, num.intValue - 1) }) {
           Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
         }
         Text(text = "${num.intValue}")
