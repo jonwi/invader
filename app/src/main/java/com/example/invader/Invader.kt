@@ -3,7 +3,6 @@ package com.example.invader
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,13 +34,13 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -70,8 +69,8 @@ fun Invader(
           openDialog.value = false
           resetDeck()
         },
-        dialogTitle = "Neues Spiel",
-        dialogText = "Es wird neu gemischt und kann nicht mehr rückgängig gemacht werden.",
+        dialogTitle = stringResource(R.string.new_game),
+        dialogText = stringResource(R.string.new_game_dialog),
         icon = Icons.Default.Warning
       )
     }
@@ -105,7 +104,7 @@ fun Invader(
         Button(
           onClick = { openDialog.value = true }
         ) {
-          Text("Neues Spiel")
+          Text(stringResource(R.string.neues_spiel))
         }
       }
     }
@@ -140,7 +139,7 @@ fun AlertDialog(
           onConfirmation()
         }
       ) {
-        Text("Bestätigen")
+        Text(stringResource(R.string.confirm))
       }
     },
     dismissButton = {
@@ -149,7 +148,7 @@ fun AlertDialog(
           onDismissRequest()
         }
       ) {
-        Text("Abbrechen")
+        Text(stringResource(R.string.abort))
       }
     }
   )
@@ -181,7 +180,7 @@ fun Splitter(width: Dp = 20.dp, color: Color = Color.Black) {
 fun Building(card: Pair<Card, Int>) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     DynamicDisplay(card = card)
-    Text(text = "Bauen")
+    Text(text = stringResource(R.string.building))
   }
 }
 
@@ -189,7 +188,7 @@ fun Building(card: Pair<Card, Int>) {
 fun Ravage(card: Pair<Card, Int>) {
   Column(horizontalAlignment = Alignment.CenterHorizontally) {
     DynamicDisplay(card = card)
-    Text(text = "Wüten")
+    Text(text = stringResource(R.string.ravage))
   }
 }
 
@@ -201,7 +200,7 @@ fun Explore(card: Pair<Card, Int>, onClick: () -> Unit) {
     Box(modifier = Modifier.clickable(onClick = onClick)) {
       DynamicDisplay(card = card)
     }
-    Text(text = "Erkunden")
+    Text(text = stringResource(R.string.explore))
   }
 }
 
@@ -211,7 +210,7 @@ fun Discard(card: Pair<Card, Int>) {
     Column(modifier = Modifier.rotate(-90f)) {
       DynamicDisplay(card = card)
     }
-    Text("Ablage")
+    Text(stringResource(R.string.ablage))
   }
 }
 
@@ -241,37 +240,37 @@ fun DynamicDisplay(card: Pair<Card, Int>) {
 @Preview
 @Composable
 fun Swamp(gen: Int = 1, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.SWAMP.color, text = "Sumpf", generation = gen, nation = nation)
+  SingleDisplayCard(color = CardColor.SWAMP.color, text = stringResource(R.string.sumpf), generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
 fun Mountain(gen: Int = 2, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = "Berg", generation = gen, nation = nation)
+  SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = stringResource(R.string.berg), generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
 fun Desert(gen: Int = 1, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.DESERT.color, text = "Wüste", generation = gen, nation = nation)
+  SingleDisplayCard(color = CardColor.DESERT.color, text = stringResource(R.string.desert), generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
 fun Jungle(gen: Int = 1, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.JUNGLE.color, text = "Dschungel", generation = gen, nation = nation)
+  SingleDisplayCard(color = CardColor.JUNGLE.color, text = stringResource(R.string.dschungel), generation = gen, nation = nation)
 }
 
 @Preview
 @Composable
 fun Coast(gen: Int = 1) {
-  SingleDisplayCard(color = CardColor.COAST.color, text = "Küste", generation = gen)
+  SingleDisplayCard(color = CardColor.COAST.color, text = stringResource(R.string.coast), generation = gen)
 }
 
 @Preview
 @Composable
 fun Finish() {
-  SingleDisplayCard(color = CardColor.FINISH.color, text = "Gewonnen")
+  SingleDisplayCard(color = CardColor.FINISH.color, text = stringResource(R.string.gewonnen))
 }
 
 @Preview
@@ -285,7 +284,7 @@ fun Empty(gen: Int = 2) {
     Box(contentAlignment = Alignment.TopCenter) {
       Image(
         painter = painterResource(id = R.drawable.invasoren),
-        contentDescription = "Empty",
+        contentDescription = stringResource(R.string.empty),
         contentScale = ContentScale.FillBounds,
         modifier = Modifier.fillMaxSize()
       )
@@ -307,38 +306,38 @@ fun Empty(gen: Int = 2) {
 @Preview
 @Composable
 fun DesertJungle() {
-  DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.JUNGLE.color, text1 = "Wüste", text2 = "Dschungel")
+  DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.desert), text2 = stringResource(R.string.dschungel))
 }
 
 @Preview
 @Composable
 fun DesertSwamp() {
-  DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.SWAMP.color, text1 = "Wüste", text2 = "Sumpf")
+  DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.SWAMP.color, text1 = stringResource(R.string.desert), text2 = stringResource(R.string.sumpf))
 }
 
 @Preview
 @Composable
 fun MountainDesert() {
-  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.DESERT.color, text1 = "Berg", text2 = "Wüste")
+  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.DESERT.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.desert))
 }
 
 @Preview
 @Composable
 fun MountainJungle() {
-  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.JUNGLE.color, text1 = "Berg", text2 = "Dschungel")
+  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.dschungel))
 }
 
 
 @Preview
 @Composable
 fun MountainSwamp() {
-  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.SWAMP.color, text1 = "Berg", text2 = "Sumpf")
+  DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.SWAMP.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.sumpf))
 }
 
 @Preview
 @Composable
 fun SwampJungle() {
-  DoubleDisplayCard(color1 = CardColor.SWAMP.color, color2 = CardColor.JUNGLE.color, text1 = "Sumpf", text2 = "Dschungel")
+  DoubleDisplayCard(color1 = CardColor.SWAMP.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.sumpf), text2 = stringResource(R.string.dschungel))
 }
 
 
@@ -408,15 +407,20 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, natio
             painter = painterResource(id = R.drawable.nation),
             contentDescription = "Empty",
             contentScale = ContentScale.FillHeight,
-            modifier = Modifier.padding(5.dp).size(20.dp, 20.dp).blur(5.dp, BlurredEdgeTreatment.Unbounded),
+            modifier = Modifier
+              .padding(5.dp)
+              .size(20.dp, 20.dp)
+              .blur(5.dp, BlurredEdgeTreatment.Unbounded),
             colorFilter = ColorFilter.tint(Color.White),
 
-          )
+            )
           Image(
             painter = painterResource(id = R.drawable.nation),
             contentDescription = "Empty",
             contentScale = ContentScale.FillHeight,
-            modifier = Modifier.padding(5.dp).size(20.dp, 20.dp)
+            modifier = Modifier
+              .padding(5.dp)
+              .size(20.dp, 20.dp)
           )
         }
       else

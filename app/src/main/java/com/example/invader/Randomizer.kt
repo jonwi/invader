@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,7 +71,7 @@ fun Randomizer() {
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = easyOnly.value, onCheckedChange = { easyOnly.value = !easyOnly.value })
-        Text("Nur einfache Geister")
+        Text(stringResource(R.string.easy))
       }
       Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { num.intValue = min(0, num.intValue - 1) }) {
@@ -82,7 +83,7 @@ fun Randomizer() {
         }
       }
       Button(onClick = handleRandomizer) {
-        Text("Zufall")
+        Text(stringResource(R.string.randomize))
       }
     }
   }
@@ -143,12 +144,12 @@ fun Spirits(spirits: List<Spirit>) {
       ) {
         Image(
           painter = painterResource(id = spirit.drawable),
-          contentDescription = spirit.desc,
+          contentDescription = stringResource(spirit.descResource),
           modifier = Modifier.clip(RoundedCornerShape(30.dp)),
           contentScale = ContentScale.Fit
         )
         Text(
-          spirit.desc,
+          stringResource(spirit.descResource),
           fontWeight = FontWeight.Bold,
           color = MaterialTheme.colorScheme.primary,
           textAlign = TextAlign.Center,
@@ -164,15 +165,15 @@ fun Spirits(spirits: List<Spirit>) {
 }
 
 
-enum class Spirit(val drawable: Int, val desc: String) {
-  Erde(R.drawable.resilience, "Erde"),
-  Flamme(R.drawable.madness, "Flackernde Flamme"),
-  Blitz(R.drawable.wind, "Blitzschneller Blitz"),
-  Fluss(R.drawable.sunshine, "Sonnengenährter Fluss"),
-  Ozean(R.drawable.deeps, "Tiefer Ozean"),
-  Angst(R.drawable.violence, "Angst und Schatten"),
-  Dahan(R.drawable.tactician, "Taktischer Rückzug"),
-  Wald(R.drawable.tangles, "Wald und noch mehr Wald"),
+enum class Spirit(val drawable: Int, val descResource: Int) {
+  Erde(R.drawable.resilience, R.string.erde),
+  Flamme(R.drawable.madness, R.string.schatten),
+  Blitz(R.drawable.wind, R.string.blitz),
+  Fluss(R.drawable.sunshine, R.string.fluss),
+  Ozean(R.drawable.deeps, R.string.ozean),
+  Angst(R.drawable.violence, R.string.bote),
+  Dahan(R.drawable.tactician, R.string.donner),
+  Wald(R.drawable.tangles, R.string.wald),
 }
 
 enum class Map {
@@ -187,8 +188,8 @@ enum class Orientation {
   Down;
 
   fun degree(index: Int): Float {
-    return if (this == Up){
-      if (index % 2 == 0 )
+    return if (this == Up) {
+      if (index % 2 == 0)
         0f
       else
         -180f

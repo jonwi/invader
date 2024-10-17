@@ -1,3 +1,32 @@
 <resources>
+    <!--  Randomizer  -->
     <string name="app_name">Spirit Island Companion</string>
+    <string name="erde">Lebenskraft der Erde</string>
+    <string name="schatten">Flackernde Schatten</string>
+    <string name="blitz">Pfeilschneller Blitzschlag</string>
+    <string name="fluss">Sonnengenährter Fluss</string>
+    <string name="ozean">Hunger des Ozeans</string>
+    <string name="bote">Bote der Albträume</string>
+    <string name="donner">Stimme des Donners</string>
+    <string name="wald">Wild wucherndes Grün</string>string>
+    <string name="easy">Nur einfache Geister</string>
+    <string name="randomize">Zufall</string>
+
+    <!--  Invader  -->
+    <string name="new_game">Neues Spiel</string>
+    <string name="new_game_dialog">Es wird neu gemischt und kann nicht mehr rückgängig gemacht werden.</string>
+    <string name="confirm">Bestätigen</string>
+    <string name="abort">Abbrechen</string>
+    <string name="building">Bauen</string>
+    <string name="explore">Erkunden</string>
+    <string name="ravage">Wüten</string>
+    <string name="ablage">Ablage</string>
+    <string name="sumpf">Sumpf</string>
+    <string name="berg">Berg</string>
+    <string name="dschungel">Dschungel</string>
+    <string name="desert">Wüste</string>
+    <string name="coast">Küste</string>
+    <string name="empty">Leer</string>
+    <string name="neues_spiel">Neues Spiel</string>
+    <string name="gewonnen">Gewonnen</string>
 </resources>
