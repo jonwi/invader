@@ -91,7 +91,7 @@ fun Randomizer() {
 @Preview
 @Composable
 fun MapPreview() {
-  Map(listOf(Map.A, Map.B, Map.C), Orientation.Down)
+  Map(listOf(Map.A, Map.B), Orientation.Up)
 }
 
 @Composable
@@ -106,7 +106,7 @@ fun Map(maps: List<Map>, orientation: Orientation) {
       Box(
         modifier = Modifier
           .size(90.dp, 90.dp)
-          .rotate(if (orientation == Orientation.Down && i % 2 == 0) -180f else 0f)
+          .rotate(orientation.degree(i))
           .padding(5.dp),
         contentAlignment = Alignment.Center
       ) {
@@ -184,7 +184,21 @@ enum class Map {
 
 enum class Orientation {
   Up,
-  Down,
+  Down;
+
+  fun degree(index: Int): Float {
+    return if (this == Up){
+      if (index % 2 == 0 )
+        0f
+      else
+        -180f
+    } else {
+      if (index % 2 == 0)
+        -180f
+      else
+        0f
+    }
+  }
 }
 
 fun randomSpirits(num: Int, easyOnly: Boolean): List<Spirit> {
