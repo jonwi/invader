@@ -100,6 +100,7 @@ fun Invader(
           openNationDialog.value = false
           setNationConfig(nc)
         },
+        currentConfig = nationConfig
       )
     }
   }
@@ -209,9 +210,10 @@ fun NationDisplay(nationConfig: NationConfig) {
 fun NationDialog(
   onDismissRequest: () -> Unit,
   onConfirmation: (NationConfig) -> Unit,
+  currentConfig: NationConfig
 ) {
-  val nation = remember { mutableStateOf(Nation.None) }
-  val level = remember { mutableIntStateOf(1) }
+  val nation = remember { mutableStateOf(currentConfig.nation) }
+  val level = remember { mutableIntStateOf(currentConfig.level) }
 
   AlertDialog(
     properties = DialogProperties(usePlatformDefaultWidth = false),
