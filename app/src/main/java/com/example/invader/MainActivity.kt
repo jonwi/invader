@@ -58,7 +58,8 @@ class MainActivity : ComponentActivity() {
                   discardCard.value = immigrationCard.value
                   immigrationCard.value = ravageCard.value
                 } else {
-                  discardCard.value = ravageCard.value
+                  if (ravageCard.value != Card.EMPTY)
+                    discardCard.value = ravageCard.value
                 }
                 ravageCard.value = buildingCard.value
                 buildingCard.value = exploreCard.value
@@ -71,7 +72,10 @@ class MainActivity : ComponentActivity() {
           val resetDeck = {
             deck.value = Deck(nationConfig.value)
             exploreCard.value = deck.value.next()
-            discardCard.value = Card.EMPTY
+            if (nationConfig.value.nation == Nation.Schweden && nationConfig.value.level >= 4)
+              discardCard.value = deck.value.next()
+            else
+              discardCard.value = Card.EMPTY
             immigrationCard.value = Card.EMPTY
             ravageCard.value = Card.EMPTY
             buildingCard.value = Card.EMPTY
