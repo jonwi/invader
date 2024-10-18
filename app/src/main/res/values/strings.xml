@@ -28,5 +28,12 @@
     <string name="coast">Küste</string>
     <string name="empty">Leer</string>
     <string name="neues_spiel">Neues Spiel</string>
-    <string name="gewonnen">Gewonnen</string>
+    <string name="gewonnen">Verloren</string>
+    <string name="schweden">Königreich Schweden</string>
+    <string name="england">Königreich England</string>
+    <string name="brandenburg">Königreich Brandenburg-Preussen</string>
+    <string name="none">Keine</string>
+    <string name="nationen_einstellungen">Nationen Einstellungen</string>
+    <string name="level">Level</string>
+    <string name="cards">"Cards: "</string>
 </resources>

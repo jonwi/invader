@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -20,7 +20,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -37,38 +36,43 @@ class MainActivity : ComponentActivity() {
         Surface(
           modifier = Modifier.fillMaxSize(),
         ) {
+          val nationConfig = remember { mutableStateOf(NationConfig(Nation.Brandenburg, 6)) }
           val screen = remember { mutableStateOf(Screens.Invaders) }
-          val deck = remember { mutableStateOf(Deck()) }
-          val counter = remember { mutableIntStateOf(12) }
-          val discardCard = remember { mutableStateOf(Card.EMPTY to 0) }
-          val ravageCard = remember { mutableStateOf(Card.EMPTY to 0) }
-          val exploreCard = remember { mutableStateOf(Card.EMPTY to 1) }
-          val buildingCard = remember { mutableStateOf(Card.EMPTY to 0) }
+          val deck = remember { mutableStateOf(Deck(nationConfig.value)) }
+          val discardCard = remember { mutableStateOf(Card.EMPTY) }
+          val ravageCard = remember { mutableStateOf(Card.EMPTY) }
+          val exploreCard = remember { mutableStateOf(deck.value.next()) }
+          val buildingCard = remember { mutableStateOf(Card.EMPTY) }
+          val revealded = remember { mutableStateOf(false) }
 
           val activity = LocalContext.current as Activity
           activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
           val exploreClick: () -> Unit = {
-            if (exploreCard.value.first == Card.EMPTY) {
-              exploreCard.value = deck.value.next()
-              counter.intValue -= 1
-            } else if (exploreCard.value.first != Card.FINISH) {
-              discardCard.value = ravageCard.value
-              ravageCard.value = buildingCard.value
-              buildingCard.value = exploreCard.value
-              if (counter.intValue == 0)
-                exploreCard.value = Card.FINISH to 0
-              else
-                exploreCard.value = Card.EMPTY to deck.value.nextGen()
+            if (!revealded.value) {
+              revealded.value = true
+            } else {
+              if (deck.value.size > 0) {
+                discardCard.value = ravageCard.value
+                ravageCard.value = buildingCard.value
+                buildingCard.value = exploreCard.value
+                exploreCard.value = deck.value.next()
+                revealded.value = false
+              }
             }
           }
+
           val resetDeck = {
-            deck.value = Deck()
-            exploreCard.value = Card.EMPTY to 1
-            discardCard.value = Card.EMPTY to 0
-            ravageCard.value = Card.EMPTY to 0
-            buildingCard.value = Card.EMPTY to 0
-            counter.intValue = 12
+            deck.value = Deck(nationConfig.value)
+            exploreCard.value = deck.value.next()
+            discardCard.value = Card.EMPTY
+            ravageCard.value = Card.EMPTY
+            buildingCard.value = Card.EMPTY
+            revealded.value = false
+          }
+
+          val setNationConfig = { nc: NationConfig ->
+            nationConfig.value = nc
           }
 
           Scaffold(
@@ -108,7 +112,7 @@ class MainActivity : ComponentActivity() {
               }
             }
           ) { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Box(modifier = Modifier.padding(innerPadding)) {
               when (screen.value) {
                 Screens.Randomizer -> Randomizer()
                 Screens.Invaders -> Invader(
@@ -118,7 +122,10 @@ class MainActivity : ComponentActivity() {
                   discardCard = discardCard.value,
                   ravageCard = ravageCard.value,
                   exploreClick = exploreClick,
-                  counter = counter.intValue
+                  counter = deck.value.size,
+                  revealed = revealded.value,
+                  nationConfig = nationConfig.value,
+                  setNationConfig = setNationConfig
                 )
               }
             }
