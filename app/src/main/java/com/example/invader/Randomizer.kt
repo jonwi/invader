@@ -51,7 +51,7 @@ fun Randomizer() {
   val map = remember { mutableStateOf(emptyList<Map>() to Orientation.Up) }
   val spirits = remember { mutableStateOf(emptyList<Spirit>()) }
   val num = remember { mutableIntStateOf(2) }
-  val easyOnly = remember { mutableStateOf(true) }
+  val easyOnly = remember { mutableStateOf(false) }
 
   val handleRandomizer: () -> Unit = {
     spirits.value = randomSpirits(num.intValue, easyOnly.value)
