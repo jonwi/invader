@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -74,32 +73,20 @@ fun Invader(
   nationConfig: NationConfig,
   setNationConfig: (NationConfig) -> Unit
 ) {
-  val openNewGameDialog = remember { mutableStateOf(false) }
   val openNationDialog = remember { mutableStateOf(false) }
 
   val openNationDialogFunc = {
     openNationDialog.value = true
   }
 
-  val openNewGameDialogFunc = {
-    openNewGameDialog.value = true
-  }
-
   when {
-    openNewGameDialog.value -> {
-      AlertDialog(onDismissRequest = { openNewGameDialog.value = false }, onConfirmation = {
-        openNewGameDialog.value = false
-        resetDeck()
-      }, dialogTitle = stringResource(R.string.new_game), dialogText = stringResource(R.string.new_game_dialog), icon = Icons.Default.Warning
-      )
-    }
-
     openNationDialog.value -> {
       NationDialog(
         onDismissRequest = { openNationDialog.value = false },
         onConfirmation = { nc: NationConfig ->
           openNationDialog.value = false
           setNationConfig(nc)
+          resetDeck()
         },
         currentConfig = nationConfig
       )
@@ -117,7 +104,7 @@ fun Invader(
       immigrationCard = immigrationCard,
       nationConfig = nationConfig
     )
-    Bottom(nationConfig, openNationDialogFunc, openNewGameDialogFunc)
+    Bottom(nationConfig, openNationDialogFunc)
   }
 }
 
@@ -176,14 +163,13 @@ fun CardDisplay(
   device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
 )
 fun BottomPreview() {
-  Bottom(NationConfig(Nation.Brandenburg, 2), {}, {})
+  Bottom(NationConfig(Nation.Brandenburg, 2)) {}
 }
 
 @Composable
 fun Bottom(
   nationConfig: NationConfig,
   openNationDialog: () -> Unit,
-  openNewGameDialog: () -> Unit,
 ) {
   Row(
     modifier = Modifier
@@ -195,11 +181,8 @@ fun Bottom(
     Row(verticalAlignment = Alignment.CenterVertically) {
       NationDisplay(nationConfig)
       Spacer(modifier = Modifier.width(20.dp))
-      Button(onClick = { openNationDialog() }) {
-        Icon(Icons.Filled.Settings, contentDescription = "Nation Settings")
-      }
     }
-    Button(onClick = { openNewGameDialog() }) {
+    Button(onClick = { openNationDialog() }) {
       Text(stringResource(R.string.neues_spiel))
     }
   }
@@ -228,7 +211,7 @@ fun NationDisplay(nationConfig: NationConfig) {
 fun NationDialog(
   onDismissRequest: () -> Unit,
   onConfirmation: (NationConfig) -> Unit,
-  currentConfig: NationConfig
+  currentConfig: NationConfig,
 ) {
   val nation = remember { mutableStateOf(currentConfig.nation) }
   val level = remember { mutableIntStateOf(currentConfig.level) }
@@ -237,7 +220,7 @@ fun NationDialog(
     properties = DialogProperties(usePlatformDefaultWidth = false),
     modifier = Modifier.fillMaxWidth(.8f),
     title = {
-      Text(text = stringResource(R.string.nationen_einstellungen))
+      Text(text = stringResource(R.string.neues_spiel))
     },
     text = {
       Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
