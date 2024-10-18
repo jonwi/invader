@@ -68,6 +68,7 @@ fun Invader(
   ravageCard: Card,
   exploreCard: Card,
   buildingCard: Card,
+  immigrationCard: Card,
   exploreClick: () -> Unit,
   revealed: Boolean,
   nationConfig: NationConfig,
@@ -105,7 +106,17 @@ fun Invader(
     }
   }
   Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxHeight()) {
-    CardDisplay(discardCard, ravageCard, buildingCard, exploreCard, counter, exploreClick, revealed)
+    CardDisplay(
+      discardCard = discardCard,
+      ravageCard = ravageCard,
+      buildingCard = buildingCard,
+      exploreCard = exploreCard,
+      counter = counter,
+      exploreClick = exploreClick,
+      revealed = revealed,
+      immigrationCard = immigrationCard,
+      nationConfig = nationConfig
+    )
     Bottom(nationConfig, openNationDialogFunc, openNewGameDialogFunc)
   }
 }
@@ -115,7 +126,7 @@ fun Invader(
 )
 @Composable
 fun CardDisplayPreview() {
-  CardDisplay(Card.EMPTY, Card.EMPTY, Card.EMPTY, Card.JUNGLE, 12, {}, false)
+  CardDisplay(Card.EMPTY, Card.EMPTY, Card.EMPTY, Card.EMPTY, Card.JUNGLE, 12, {}, false, NationConfig(Nation.England, 3))
 }
 
 @Composable
@@ -123,10 +134,12 @@ fun CardDisplay(
   discardCard: Card,
   ravageCard: Card,
   buildingCard: Card,
+  immigrationCard: Card,
   exploreCard: Card,
   counter: Int,
   exploreClick: () -> Unit,
-  revealed: Boolean
+  revealed: Boolean,
+  nationConfig: NationConfig
 ) {
   Column(
     modifier = Modifier.fillMaxWidth()
@@ -143,11 +156,16 @@ fun CardDisplay(
       modifier = Modifier.fillMaxWidth()
     ) {
       Discard(card = discardCard)
-      Splitter(color = MaterialTheme.colorScheme.primary)
+      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
+        Splitter(color = MaterialTheme.colorScheme.primary)
+      if (nationConfig.nation == Nation.England && nationConfig.level >= 3)
+        Immigration(card = immigrationCard)
       Ravage(card = ravageCard)
-      Splitter(color = MaterialTheme.colorScheme.primary)
+      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
+        Splitter(color = MaterialTheme.colorScheme.primary)
       Building(card = buildingCard)
-      Splitter(color = MaterialTheme.colorScheme.primary)
+      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
+        Splitter(color = MaterialTheme.colorScheme.primary)
       Explore(card = exploreCard, onClick = exploreClick, revealed)
     }
   }
@@ -218,11 +236,10 @@ fun NationDialog(
   AlertDialog(
     properties = DialogProperties(usePlatformDefaultWidth = false),
     modifier = Modifier.fillMaxWidth(.8f),
-    icon = {
-      Icon(Icons.Filled.Settings, contentDescription = "Example Icon")
-    }, title = {
+    title = {
       Text(text = stringResource(R.string.nationen_einstellungen))
-    }, text = {
+    },
+    text = {
       Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
           Button(
@@ -331,6 +348,14 @@ fun Splitter(width: Dp = 20.dp, color: Color = Color.Black) {
       .width(width)
       .height(width * 2))
     Text(text = "")
+  }
+}
+
+@Composable
+fun Immigration(card: Card) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    DynamicDisplay(card = card)
+    Text(text = stringResource(R.string.immigration))
   }
 }
 

@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
           val screen = remember { mutableStateOf(Screens.Invaders) }
           val deck = remember { mutableStateOf(Deck(nationConfig.value)) }
           val discardCard = remember { mutableStateOf(Card.EMPTY) }
+          val immigrationCard = remember { mutableStateOf(Card.EMPTY) }
           val ravageCard = remember { mutableStateOf(Card.EMPTY) }
           val exploreCard = remember { mutableStateOf(deck.value.next()) }
           val buildingCard = remember { mutableStateOf(Card.EMPTY) }
@@ -53,7 +54,12 @@ class MainActivity : ComponentActivity() {
               revealded.value = true
             } else {
               if (deck.value.size > 0) {
-                discardCard.value = ravageCard.value
+                if (nationConfig.value.nation == Nation.England || nationConfig.value.level >= 3) {
+                  discardCard.value = immigrationCard.value
+                  immigrationCard.value = ravageCard.value
+                } else {
+                  discardCard.value = ravageCard.value
+                }
                 ravageCard.value = buildingCard.value
                 buildingCard.value = exploreCard.value
                 exploreCard.value = deck.value.next()
@@ -66,6 +72,7 @@ class MainActivity : ComponentActivity() {
             deck.value = Deck(nationConfig.value)
             exploreCard.value = deck.value.next()
             discardCard.value = Card.EMPTY
+            immigrationCard.value = Card.EMPTY
             ravageCard.value = Card.EMPTY
             buildingCard.value = Card.EMPTY
             revealded.value = false
@@ -120,6 +127,7 @@ class MainActivity : ComponentActivity() {
                   buildingCard = buildingCard.value,
                   exploreCard = exploreCard.value,
                   discardCard = discardCard.value,
+                  immigrationCard = immigrationCard.value,
                   ravageCard = ravageCard.value,
                   exploreClick = exploreClick,
                   counter = deck.value.size,
