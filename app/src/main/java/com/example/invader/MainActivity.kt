@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         Surface(
           modifier = Modifier.fillMaxSize(),
         ) {
-          val nationConfig = remember { mutableStateOf(NationConfig(Nation.Brandenburg, 6)) }
+          val nationConfig = remember { mutableStateOf(NationConfig(Nation.None, 1)) }
           val screen = remember { mutableStateOf(Screens.Invaders) }
           val deck = remember { mutableStateOf(Deck(nationConfig.value)) }
           val discardCard = remember { mutableStateOf(Card.EMPTY) }
