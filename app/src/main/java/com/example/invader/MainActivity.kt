@@ -44,14 +44,14 @@ class MainActivity : ComponentActivity() {
           val ravageCard = remember { mutableStateOf(Card.EMPTY) }
           val exploreCard = remember { mutableStateOf(deck.value.next()) }
           val buildingCard = remember { mutableStateOf(Card.EMPTY) }
-          val revealded = remember { mutableStateOf(false) }
+          val revealed = remember { mutableStateOf(false) }
 
           val activity = LocalContext.current as Activity
           activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
           val exploreClick: () -> Unit = {
-            if (!revealded.value) {
-              revealded.value = true
+            if (!revealed.value) {
+              revealed.value = true
             } else {
               if (deck.value.size > 0) {
                 if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && ravageCard.value.gen == 1) {
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                 ravageCard.value = buildingCard.value
                 buildingCard.value = exploreCard.value
                 exploreCard.value = deck.value.next()
-                revealded.value = false
+                revealed.value = false
               }
             }
           }
@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
             immigrationCard.value = Card.EMPTY
             ravageCard.value = Card.EMPTY
             buildingCard.value = Card.EMPTY
-            revealded.value = false
+            revealed.value = false
           }
 
           val setNationConfig = { nc: NationConfig ->
@@ -131,7 +131,7 @@ class MainActivity : ComponentActivity() {
                   ravageCard = ravageCard.value,
                   exploreClick = exploreClick,
                   counter = deck.value.size,
-                  revealed = revealded.value,
+                  revealed = revealed.value,
                   nationConfig = nationConfig.value,
                   setNationConfig = setNationConfig
                 )
