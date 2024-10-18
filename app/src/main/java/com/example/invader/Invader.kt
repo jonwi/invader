@@ -145,7 +145,7 @@ fun CardDisplay(
       Discard(card = discardCard)
       if (nationConfig.nation != Nation.England || nationConfig.level < 3)
         Splitter(color = MaterialTheme.colorScheme.primary)
-      if (nationConfig.nation == Nation.England && nationConfig.level >= 3)
+      if (nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && discardCard.gen <= 1)
         Immigration(card = immigrationCard)
       Ravage(card = ravageCard)
       if (nationConfig.nation != Nation.England || nationConfig.level < 3)

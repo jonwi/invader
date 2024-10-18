@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
               revealded.value = true
             } else {
               if (deck.value.size > 0) {
-                if (nationConfig.value.nation == Nation.England || nationConfig.value.level >= 3) {
+                if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && ravageCard.value.gen == 1) {
                   discardCard.value = immigrationCard.value
                   immigrationCard.value = ravageCard.value
                 } else {
