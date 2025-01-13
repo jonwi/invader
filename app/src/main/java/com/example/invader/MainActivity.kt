@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -39,11 +40,11 @@ class MainActivity : ComponentActivity() {
           val nationConfig = remember { mutableStateOf(NationConfig(Nation.None, 1)) }
           val screen = remember { mutableStateOf(Screens.Invaders) }
           val deck = remember { mutableStateOf(Deck(nationConfig.value)) }
-          val discardCard = remember { mutableStateOf(Card.EMPTY) }
-          val immigrationCard = remember { mutableStateOf(Card.EMPTY) }
-          val ravageCard = remember { mutableStateOf(Card.EMPTY) }
-          val exploreCard = remember { mutableStateOf(deck.value.next()) }
-          val buildingCard = remember { mutableStateOf(Card.EMPTY) }
+          val discardCards = remember { mutableStateListOf<Card>() }
+          val immigrationCards = remember { mutableStateListOf<Card>() }
+          val ravageCards = remember { mutableStateListOf<Card>() }
+          val exploreCards = remember { mutableStateListOf<Card>(*deck.value.cards.toTypedArray()) }
+          val buildingCards = remember { mutableStateListOf<Card>() }
           val revealed = remember { mutableStateOf(false) }
 
           val activity = LocalContext.current as Activity
@@ -53,32 +54,35 @@ class MainActivity : ComponentActivity() {
             if (!revealed.value) {
               revealed.value = true
             } else {
-              if (deck.value.size > 0) {
-                if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && ravageCard.value.gen == 1) {
-                  discardCard.value = immigrationCard.value
-                  immigrationCard.value = ravageCard.value
+              if (!exploreCards.isEmpty()) {
+                if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && (ravageCards.isEmpty() || ravageCards.first().gen == 1)) {
+                  discardCards.addAll(immigrationCards)
+                  immigrationCards.removeAll(immigrationCards)
+                  immigrationCards.addAll(ravageCards)
                 } else {
-                  if (ravageCard.value != Card.EMPTY)
-                    discardCard.value = ravageCard.value
+                  discardCards.addAll(ravageCards)
+                  ravageCards.removeAll(ravageCards)
                 }
-                ravageCard.value = buildingCard.value
-                buildingCard.value = exploreCard.value
-                exploreCard.value = deck.value.next()
+                ravageCards.addAll(buildingCards)
+                buildingCards.removeAll(buildingCards)
+                buildingCards.add(exploreCards.last())
+                exploreCards.removeAt(exploreCards.lastIndex)
                 revealed.value = false
               }
             }
           }
 
           val resetDeck = {
+            exploreCards.removeAll(exploreCards)
+            buildingCards.removeAll(buildingCards)
+            ravageCards.removeAll(ravageCards)
+            immigrationCards.removeAll(immigrationCards)
+            discardCards.removeAll(discardCards)
+
             deck.value = Deck(nationConfig.value)
-            exploreCard.value = deck.value.next()
+            exploreCards.addAll(deck.value.cards)
             if (nationConfig.value.nation == Nation.Schweden && nationConfig.value.level >= 4)
-              discardCard.value = deck.value.next()
-            else
-              discardCard.value = Card.EMPTY
-            immigrationCard.value = Card.EMPTY
-            ravageCard.value = Card.EMPTY
-            buildingCard.value = Card.EMPTY
+              discardCards.add(exploreCards.removeAt(0))
             revealed.value = false
           }
 
@@ -128,16 +132,58 @@ class MainActivity : ComponentActivity() {
                 Screens.Randomizer -> Randomizer()
                 Screens.Invaders -> Invader(
                   resetDeck = resetDeck,
-                  buildingCard = buildingCard.value,
-                  exploreCard = exploreCard.value,
-                  discardCard = discardCard.value,
-                  immigrationCard = immigrationCard.value,
-                  ravageCard = ravageCard.value,
+                  discardCard = discardCards.toList(),
+                  ravageCard = ravageCards.toList(),
+                  exploreCard = exploreCards.toList(),
+                  buildingCard = buildingCards.toList(),
+                  immigrationCard = immigrationCards.toList(),
                   exploreClick = exploreClick,
-                  counter = deck.value.size,
                   revealed = revealed.value,
                   nationConfig = nationConfig.value,
-                  setNationConfig = setNationConfig
+                  setNationConfig = setNationConfig,
+                  addDiscardCard = { card ->
+                    ravageCards.remove(card)
+                    if (exploreCards.remove(card)) {
+                      revealed.value = false
+                    }
+                    immigrationCards.remove(card)
+                    discardCards.remove(card)
+                    buildingCards.remove(card)
+
+                    discardCards.add(card)
+                  },
+                  addRavageCard = { card ->
+                    ravageCards.remove(card)
+                    if (exploreCards.remove(card)) {
+                      revealed.value = false
+                    }
+                    immigrationCards.remove(card)
+                    discardCards.remove(card)
+                    buildingCards.remove(card)
+
+                    ravageCards.add(card)
+                  },
+                  addBuildingCard = { card ->
+                    ravageCards.remove(card)
+                    if (exploreCards.remove(card)) {
+                      revealed.value = false
+                    }
+                    immigrationCards.remove(card)
+                    discardCards.remove(card)
+                    buildingCards.remove(card)
+                    buildingCards.add(card)
+                  },
+                  addImmigrationCard = { card ->
+                    ravageCards.remove(card)
+                    if (exploreCards.remove(card)) {
+                      revealed.value = false
+                    }
+                    immigrationCards.remove(card)
+                    discardCards.remove(card)
+                    buildingCards.remove(card)
+
+                    immigrationCards.add(card)
+                  },
                 )
               }
             }

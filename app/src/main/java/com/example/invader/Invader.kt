@@ -1,9 +1,15 @@
 package com.example.invader
 
+import android.content.ClipData
+import android.content.ClipDescription
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +20,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,11 +40,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
+import androidx.compose.ui.draganddrop.mimeTypes
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
@@ -44,8 +58,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asComposePath
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,16 +76,19 @@ import kotlin.math.min
 @Composable
 fun Invader(
   resetDeck: () -> Unit,
-  counter: Int,
-  discardCard: Card,
-  ravageCard: Card,
-  exploreCard: Card,
-  buildingCard: Card,
-  immigrationCard: Card,
+  discardCard: List<Card>,
+  ravageCard: List<Card>,
+  exploreCard: List<Card>,
+  buildingCard: List<Card>,
+  immigrationCard: List<Card>,
   exploreClick: () -> Unit,
   revealed: Boolean,
   nationConfig: NationConfig,
-  setNationConfig: (NationConfig) -> Unit
+  setNationConfig: (NationConfig) -> Unit,
+  addDiscardCard: (Card) -> Unit,
+  addRavageCard: (Card) -> Unit,
+  addBuildingCard: (Card) -> Unit,
+  addImmigrationCard: (Card) -> Unit,
 ) {
   val openNationDialog = remember { mutableStateOf(false) }
 
@@ -79,16 +96,19 @@ fun Invader(
     openNationDialog.value = true
   }
 
+  val currentView = LocalView.current
+  DisposableEffect(Unit) {
+    currentView.keepScreenOn = true
+    onDispose { currentView.keepScreenOn = false }
+  }
+
   when {
     openNationDialog.value -> {
-      NationDialog(
-        onDismissRequest = { openNationDialog.value = false },
-        onConfirmation = { nc: NationConfig ->
-          openNationDialog.value = false
-          setNationConfig(nc)
-          resetDeck()
-        },
-        currentConfig = nationConfig
+      NationDialog(onDismissRequest = { openNationDialog.value = false }, onConfirmation = { nc: NationConfig ->
+        openNationDialog.value = false
+        setNationConfig(nc)
+        resetDeck()
+      }, currentConfig = nationConfig
       )
     }
   }
@@ -97,63 +117,67 @@ fun Invader(
       discardCard = discardCard,
       ravageCard = ravageCard,
       buildingCard = buildingCard,
+      immigrationCard = immigrationCard,
       exploreCard = exploreCard,
-      counter = counter,
       exploreClick = exploreClick,
       revealed = revealed,
-      immigrationCard = immigrationCard,
-      nationConfig = nationConfig
+      nationConfig = nationConfig,
+      addDiscardCard = addDiscardCard,
+      addRavageCard = addRavageCard,
+      addBuildingCard = addBuildingCard,
+      addImmigrationCard = addImmigrationCard,
+      openNationDialog = openNationDialogFunc,
     )
-    Bottom(nationConfig, openNationDialogFunc)
   }
 }
 
 @Preview(
-  device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
+  device = "spec:width=411dp,height=700dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
 )
 @Composable
 fun CardDisplayPreview() {
-  CardDisplay(Card.EMPTY, Card.EMPTY, Card.EMPTY, Card.EMPTY, Card.JUNGLE, 12, {}, false, NationConfig(Nation.England, 3))
+  CardDisplay(listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.JUNGLE), {}, false, NationConfig(Nation.Brandenburg, 3), {}, {}, {}, {}, {})
 }
 
 @Composable
 fun CardDisplay(
-  discardCard: Card,
-  ravageCard: Card,
-  buildingCard: Card,
-  immigrationCard: Card,
-  exploreCard: Card,
-  counter: Int,
+  discardCard: List<Card>,
+  ravageCard: List<Card>,
+  buildingCard: List<Card>,
+  immigrationCard: List<Card>,
+  exploreCard: List<Card>,
   exploreClick: () -> Unit,
   revealed: Boolean,
-  nationConfig: NationConfig
+  nationConfig: NationConfig,
+  addDiscardCard: (Card) -> Unit,
+  addRavageCard: (Card) -> Unit,
+  addBuildingCard: (Card) -> Unit,
+  addImmigrationCard: (Card) -> Unit,
+  openNationDialog: () -> Unit,
 ) {
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
-    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-      Box(
-        modifier = Modifier.width(100.dp),
-
-        ) { Text(text = stringResource(R.string.cards) + counter.toString()) }
-    }
-    Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.fillMaxWidth()
-    ) {
-      Discard(card = discardCard)
-      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
-        Splitter(color = MaterialTheme.colorScheme.primary)
-      if (nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && discardCard.gen <= 1)
-        Immigration(card = immigrationCard)
-      Ravage(card = ravageCard)
-      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
-        Splitter(color = MaterialTheme.colorScheme.primary)
-      Building(card = buildingCard)
-      if (nationConfig.nation != Nation.England || nationConfig.level < 3)
-        Splitter(color = MaterialTheme.colorScheme.primary)
-      Explore(card = exploreCard, onClick = exploreClick, revealed)
+    Row {
+      Discard(cards = discardCard, addCard = addDiscardCard, nationConfig = nationConfig, openNationDialog = openNationDialog)
+      Row(
+        horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
+      ) {
+        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        if (nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && (discardCard.isEmpty() || discardCard.last().gen <= 1))
+          Immigration(
+            cards = immigrationCard,
+            addCard = addImmigrationCard
+          )
+        Ravage(cards = ravageCard, addCard = addRavageCard)
+        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        Building(
+          cards = buildingCard,
+          addCard = addBuildingCard
+        )
+        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        Explore(cards = exploreCard, onClick = exploreClick, revealed)
+      }
     }
   }
 }
@@ -171,12 +195,11 @@ fun Bottom(
   nationConfig: NationConfig,
   openNationDialog: () -> Unit,
 ) {
-  Row(
+  Column(
     modifier = Modifier
       .fillMaxWidth()
       .padding(bottom = 5.dp),
-    horizontalArrangement = Arrangement.SpaceAround,
-    verticalAlignment = Alignment.CenterVertically,
+    horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       NationDisplay(nationConfig)
@@ -198,9 +221,9 @@ fun NationDisplayPreview() {
 
 @Composable
 fun NationDisplay(nationConfig: NationConfig) {
-  Row(horizontalArrangement = Arrangement.SpaceBetween) {
+  Column(horizontalAlignment = Alignment.Start) {
     Text(stringResource(nationConfig.nation.descId))
-    Row(modifier = Modifier.padding(start = 20.dp)) {
+    Row {
       Text(stringResource(R.string.level) + ":")
       Text(nationConfig.level.toString())
     }
@@ -216,91 +239,59 @@ fun NationDialog(
   val nation = remember { mutableStateOf(currentConfig.nation) }
   val level = remember { mutableIntStateOf(currentConfig.level) }
 
-  AlertDialog(
-    properties = DialogProperties(usePlatformDefaultWidth = false),
-    modifier = Modifier.fillMaxWidth(.8f),
-    title = {
-      Text(text = stringResource(R.string.neues_spiel))
-    },
-    text = {
-      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-          Button(
-            onClick = { nation.value = Nation.None }, modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.None) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-          ) {
-            Text(stringResource(Nation.None.descId))
-          }
-          Button(
-            onClick = { nation.value = Nation.Brandenburg }, modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Brandenburg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-          ) {
-            Text(stringResource(Nation.Brandenburg.descId))
-          }
-          Button(
-            onClick = { nation.value = Nation.England }, modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.England) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-          ) {
-            Text(stringResource(Nation.England.descId))
-          }
-          Button(
-            onClick = { nation.value = Nation.Schweden }, modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Schweden) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-          ) {
-            Text(stringResource(Nation.Schweden.descId))
-          }
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
-          Text("Level")
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { level.intValue = max(1, level.intValue - 1) }) {
-              Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
-            }
-            Text(text = "${level.intValue}")
-            IconButton(onClick = { level.intValue = min(level.intValue + 1, 6) }) {
-              Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
-            }
-          }
-        }
-      }
-
-    }, onDismissRequest = {
-      onDismissRequest()
-    }, confirmButton = {
-      TextButton(onClick = {
-        onConfirmation(NationConfig(nation.value, level.intValue))
-      }) {
-        Text(stringResource(R.string.confirm))
-      }
-    }, dismissButton = {
-      TextButton(onClick = {
-        onDismissRequest()
-      }) {
-        Text(stringResource(R.string.abort))
-      }
-    })
-}
-
-
-@Composable
-fun AlertDialog(
-  onDismissRequest: () -> Unit,
-  onConfirmation: () -> Unit,
-  dialogTitle: String,
-  dialogText: String,
-  icon: ImageVector,
-) {
-  AlertDialog(icon = {
-    Icon(icon, contentDescription = "Example Icon")
-  }, title = {
-    Text(text = dialogTitle)
+  AlertDialog(properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f), title = {
+    Text(text = stringResource(R.string.neues_spiel))
   }, text = {
-    Text(text = dialogText)
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+        Button(
+          onClick = { nation.value = Nation.None },
+          modifier = Modifier.fillMaxWidth(),
+          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.None) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+        ) {
+          Text(stringResource(Nation.None.descId))
+        }
+        Button(
+          onClick = { nation.value = Nation.Brandenburg },
+          modifier = Modifier.fillMaxWidth(),
+          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Brandenburg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+        ) {
+          Text(stringResource(Nation.Brandenburg.descId))
+        }
+        Button(
+          onClick = { nation.value = Nation.England },
+          modifier = Modifier.fillMaxWidth(),
+          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.England) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+        ) {
+          Text(stringResource(Nation.England.descId))
+        }
+        Button(
+          onClick = { nation.value = Nation.Schweden },
+          modifier = Modifier.fillMaxWidth(),
+          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Schweden) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+        ) {
+          Text(stringResource(Nation.Schweden.descId))
+        }
+      }
+      Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
+        Text("Level")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          IconButton(onClick = { level.intValue = max(1, level.intValue - 1) }) {
+            Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
+          }
+          Text(text = "${level.intValue}")
+          IconButton(onClick = { level.intValue = min(level.intValue + 1, 6) }) {
+            Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
+          }
+        }
+      }
+    }
+
   }, onDismissRequest = {
     onDismissRequest()
   }, confirmButton = {
     TextButton(onClick = {
-      onConfirmation()
+      onConfirmation(NationConfig(nation.value, level.intValue))
     }) {
       Text(stringResource(R.string.confirm))
     }
@@ -315,8 +306,12 @@ fun AlertDialog(
 
 @Preview
 @Composable
-fun Splitter(width: Dp = 20.dp, color: Color = Color.Black) {
-  Column() {
+fun Splitter(width: Dp = 20.dp, color: Color = Color.Black, onClick: () -> Unit = {}) {
+  Column(
+    modifier = Modifier
+      .height(200.dp)
+      .clickable(onClick = onClick), verticalArrangement = Arrangement.Center
+  ) {
     Box(modifier = Modifier
       .drawWithCache {
         val h = size.height
@@ -329,46 +324,118 @@ fun Splitter(width: Dp = 20.dp, color: Color = Color.Black) {
         onDrawBehind { drawPath(roundedPolygonPath, color = color) }
       }
       .width(width)
-      .height(width * 2))
+      .height(width * 2)
+    )
     Text(text = "")
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Immigration(card: Card) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    DynamicDisplay(card = card)
-    Text(text = stringResource(R.string.immigration))
+fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
+  Box(
+    modifier = Modifier.dragAndDropTarget(
+      shouldStartDragAndDrop = { event ->
+        event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+      }, target =
+      object : DragAndDropTarget {
+        override fun onDrop(event: DragAndDropEvent): Boolean {
+          val data = event.toAndroidDragEvent().clipData.getItemAt(0).text
+          val addedCard = Card.valueOf(data.toString())
+          addCard(addedCard)
+          return true
+        }
+      }
+    )
+  ) {
+    content()
+  }
+}
+
+@Composable
+fun Immigration(cards: List<Card>, addCard: (Card) -> Unit) {
+  CardDroppable(addCard) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Text(text = stringResource(R.string.cards) + cards.size.toString())
+      Box {
+        DynamicDisplay(Card.EMPTY, draggable = false)
+        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
+          for ((index, card) in cards.withIndex()) {
+            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
+              DynamicDisplay(card = card)
+            }
+          }
+        }
+      }
+      Text(text = stringResource(R.string.immigration))
+    }
   }
 }
 
 
 @Composable
-fun Building(card: Card) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    DynamicDisplay(card = card)
-    Text(text = stringResource(R.string.building))
+fun Building(cards: List<Card>, addCard: (Card) -> Unit) {
+  CardDroppable(addCard) {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      Text(text = stringResource(R.string.cards) + cards.size.toString())
+      Box {
+        DynamicDisplay(Card.EMPTY, draggable = false)
+        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
+          for ((index, card) in cards.withIndex()) {
+            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
+              DynamicDisplay(card = card)
+            }
+          }
+        }
+      }
+      Text(text = stringResource(R.string.building))
+    }
   }
 }
 
 @Composable
-fun Ravage(card: Card) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    DynamicDisplay(card = card)
-    Text(text = stringResource(R.string.ravage))
+fun Ravage(cards: List<Card>, addCard: (Card) -> Unit) {
+  CardDroppable(addCard) {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      Text(text = stringResource(R.string.cards) + cards.size.toString())
+      Box {
+        DynamicDisplay(Card.EMPTY, draggable = false)
+        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
+          for ((index, card) in cards.withIndex()) {
+            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
+              DynamicDisplay(card = card)
+            }
+          }
+        }
+      }
+      Text(text = stringResource(R.string.ravage))
+    }
   }
 }
 
+
 @Composable
-fun Explore(card: Card, onClick: () -> Unit, revealed: Boolean) {
+fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
+    Text(text = stringResource(R.string.cards) + cards.size.toString())
     Box(modifier = Modifier.clickable(onClick = onClick)) {
+      DynamicDisplay(Card.FINISH, draggable = false)
       if (revealed) {
-        DynamicDisplay(card = card)
+        Box {
+          for (card in cards) {
+            DynamicDisplay(card = card)
+          }
+        }
       } else {
-        Empty(card.gen)
+        if (cards.isNotEmpty()) {
+          DynamicDisplay(Card.EMPTY, cards.last().gen, false)
+        }
       }
     }
     Text(text = stringResource(R.string.explore))
@@ -376,35 +443,76 @@ fun Explore(card: Card, onClick: () -> Unit, revealed: Boolean) {
 }
 
 @Composable
-fun Discard(card: Card) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(180.dp)) {
-    Column(modifier = Modifier.rotate(-90f)) {
-      DynamicDisplay(card = card)
+fun Discard(cards: List<Card>, addCard: (Card) -> Unit, nationConfig: NationConfig, openNationDialog: () -> Unit) {
+  CardDroppable(addCard) {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top, modifier = Modifier.width(200.dp)
+    ) {
+      Text(text = stringResource(R.string.cards) + cards.size.toString())
+      Box(
+        modifier = Modifier
+          .requiredWidth(200.dp)
+          .requiredHeight(120.dp)
+      ) {
+        Box(
+          modifier = Modifier
+            .rotate(-90f)
+            .offset(y = 40.dp)
+        ) {
+          DynamicDisplay(Card.EMPTY, draggable = false)
+          for (card in cards) {
+            DynamicDisplay(card = card)
+          }
+        }
+      }
+      Column(modifier = Modifier.offset(y = (0).dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(stringResource(R.string.ablage))
+        Spacer(modifier = Modifier.height(5.dp))
+        Bottom(nationConfig = nationConfig, openNationDialog = openNationDialog)
+      }
     }
-    Text(stringResource(R.string.ablage))
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DynamicDisplay(card: Card) {
-  when (card) {
-    Card.EMPTY -> Empty(card.gen)
-    Card.SWAMP -> Swamp(card.gen)
-    Card.COAST -> Coast(card.gen)
-    Card.DESERT -> Desert(card.gen)
-    Card.JUNGLE -> Jungle(card.gen)
-    Card.SWAMP_NATION -> Swamp(card.gen, nation = true)
-    Card.MOUNTAIN_NATION -> Mountain(card.gen, nation = true)
-    Card.DESERT_NATION -> Desert(card.gen, nation = true)
-    Card.JUNGLE_NATION -> Jungle(card.gen, nation = true)
-    Card.FINISH -> Finish()
-    Card.DESERT_JUNGLE -> DesertJungle()
-    Card.DESERT_SWAMP -> DesertSwamp()
-    Card.MOUNTAIN -> Mountain(card.gen)
-    Card.MOUNTAIN_DESERT -> MountainDesert()
-    Card.MOUNTAIN_JUNGLE -> MountainJungle()
-    Card.MOUNTAIN_SWAMP -> MountainSwamp()
-    Card.SWAMP_JUNGLE -> SwampJungle()
+fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
+  Box(
+    modifier = Modifier
+      .then(if (draggable)
+        Modifier.dragAndDropSource {
+          detectTapGestures(onPress = {
+            startTransfer(
+              DragAndDropTransferData(
+                ClipData.newPlainText(
+                  "card", card.toString()
+                )
+              )
+            )
+          })
+        } else Modifier)
+      .requiredHeight(200.dp)
+      .requiredWidth(120.dp)
+  ) {
+    when (card) {
+      Card.EMPTY -> Empty(gen)
+      Card.SWAMP -> Swamp(1)
+      Card.DESERT -> Desert(1)
+      Card.JUNGLE -> Jungle(1)
+      Card.MOUNTAIN -> Mountain(1)
+      Card.COAST -> Coast(2)
+      Card.SWAMP_NATION -> Swamp(2, nation = true)
+      Card.MOUNTAIN_NATION -> Mountain(2, nation = true)
+      Card.DESERT_NATION -> Desert(2, nation = true)
+      Card.JUNGLE_NATION -> Jungle(2, nation = true)
+      Card.FINISH -> Finish()
+      Card.DESERT_JUNGLE -> DesertJungle()
+      Card.DESERT_SWAMP -> DesertSwamp()
+      Card.MOUNTAIN_DESERT -> MountainDesert()
+      Card.MOUNTAIN_JUNGLE -> MountainJungle()
+      Card.MOUNTAIN_SWAMP -> MountainSwamp()
+      Card.SWAMP_JUNGLE -> SwampJungle()
+    }
   }
 }
 
@@ -446,15 +554,15 @@ fun Finish() {
 
 @Preview
 @Composable
-fun Empty(gen: Int = 2) {
+fun Empty(gen: Int? = 2) {
   Card(
-    border = BorderStroke(2.dp, Color.Black), modifier = Modifier.size(width = 120.dp, height = 200.dp)
+    border = BorderStroke(2.dp, Color.Black),
   ) {
     Box(contentAlignment = Alignment.TopCenter) {
       Image(
         painter = painterResource(id = R.drawable.invasoren), contentDescription = stringResource(R.string.empty), contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize()
       )
-      Column() {
+      Column {
         Spacer(modifier = Modifier.weight(1f, true))
         Box(modifier = Modifier.weight(7f, true)) {
           when (gen) {
@@ -597,7 +705,7 @@ enum class Nation(val descId: Int) {
 
 data class NationConfig(val nation: Nation, val level: Int)
 
-class Deck(val nationConfig: NationConfig) {
+class Deck(nationConfig: NationConfig) {
   private val firstColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.MOUNTAIN, Card.DESERT)
   private val secondColors = mutableListOf(Card.SWAMP_NATION, Card.JUNGLE_NATION, Card.DESERT_NATION, Card.COAST, Card.MOUNTAIN_NATION)
   private val thirdColors = mutableListOf(Card.MOUNTAIN_DESERT, Card.SWAMP_JUNGLE, Card.DESERT_JUNGLE, Card.MOUNTAIN_JUNGLE, Card.DESERT_SWAMP, Card.MOUNTAIN_SWAMP)
@@ -641,14 +749,8 @@ class Deck(val nationConfig: NationConfig) {
         deck.addAll(thirdColors)
       }
     }
-
-    deck.add(Card.FINISH)
   }
 
-  val size get() = deck.size
-
-  fun next(): Card {
-    return deck.removeAt(0)
-  }
+  val cards get() = deck.toList().reversed()
 
 }
