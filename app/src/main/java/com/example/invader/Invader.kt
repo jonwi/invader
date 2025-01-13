@@ -2,6 +2,7 @@ package com.example.invader
 
 import android.content.ClipData
 import android.content.ClipDescription
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -41,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -343,6 +345,7 @@ fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
           val data = event.toAndroidDragEvent().clipData.getItemAt(0).text
           val addedCard = Card.valueOf(data.toString())
           addCard(addedCard)
+          Log.d(data.toString(), data.toString())
           return true
         }
       }
@@ -353,20 +356,28 @@ fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
 }
 
 @Composable
+fun CardStack(cards: List<Card>) {
+  Box() {
+    DynamicDisplay(Card.EMPTY, draggable = false)
+    Column(verticalArrangement = Arrangement.spacedBy(-(185).dp)) {
+      for ((index, card) in cards.withIndex()) {
+        key(card) {
+          Box(modifier = Modifier.padding(start = (15 * index).dp)) {
+            DynamicDisplay(card = card)
+          }
+        }
+      }
+    }
+  }
+}
+
+
+@Composable
 fun Immigration(cards: List<Card>, addCard: (Card) -> Unit) {
   CardDroppable(addCard) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Text(text = stringResource(R.string.cards) + cards.size.toString())
-      Box {
-        DynamicDisplay(Card.EMPTY, draggable = false)
-        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
-          for ((index, card) in cards.withIndex()) {
-            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
-              DynamicDisplay(card = card)
-            }
-          }
-        }
-      }
+      CardStack(cards)
       Text(text = stringResource(R.string.immigration))
     }
   }
@@ -380,16 +391,7 @@ fun Building(cards: List<Card>, addCard: (Card) -> Unit) {
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(text = stringResource(R.string.cards) + cards.size.toString())
-      Box {
-        DynamicDisplay(Card.EMPTY, draggable = false)
-        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
-          for ((index, card) in cards.withIndex()) {
-            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
-              DynamicDisplay(card = card)
-            }
-          }
-        }
-      }
+      CardStack(cards)
       Text(text = stringResource(R.string.building))
     }
   }
@@ -402,16 +404,7 @@ fun Ravage(cards: List<Card>, addCard: (Card) -> Unit) {
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       Text(text = stringResource(R.string.cards) + cards.size.toString())
-      Box {
-        DynamicDisplay(Card.EMPTY, draggable = false)
-        Column(verticalArrangement = Arrangement.spacedBy(-(190).dp)) {
-          for ((index, card) in cards.withIndex()) {
-            Box(modifier = Modifier.padding(start = (10 * index).dp)) {
-              DynamicDisplay(card = card)
-            }
-          }
-        }
-      }
+      CardStack(cards)
       Text(text = stringResource(R.string.ravage))
     }
   }
@@ -485,7 +478,7 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
             startTransfer(
               DragAndDropTransferData(
                 ClipData.newPlainText(
-                  "card", card.toString()
+                  card.toString(), card.toString()
                 )
               )
             )

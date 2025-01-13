@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
           val discardCards = remember { mutableStateListOf<Card>() }
           val immigrationCards = remember { mutableStateListOf<Card>() }
           val ravageCards = remember { mutableStateListOf<Card>() }
-          val exploreCards = remember { mutableStateListOf<Card>(*deck.value.cards.toTypedArray()) }
+          val exploreCards = remember { mutableStateListOf(*deck.value.cards.toTypedArray()) }
           val buildingCards = remember { mutableStateListOf<Card>() }
           val revealed = remember { mutableStateOf(false) }
 
@@ -97,8 +97,7 @@ class MainActivity : ComponentActivity() {
                 contentColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.height(40.dp)
               ) {
-                Row(
-                ) {
+                Row {
                   IconButton(
                     onClick = { screen.value = Screens.Randomizer },
                     modifier = Modifier
