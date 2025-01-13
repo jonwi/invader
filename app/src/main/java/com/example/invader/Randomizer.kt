@@ -182,6 +182,8 @@ enum class Map {
   B,
   C,
   D,
+  E,
+  F,
 }
 
 enum class Orientation {
@@ -217,9 +219,15 @@ fun randomSpirits(num: Int, easyOnly: Boolean): List<Spirit> {
 }
 
 fun randomMap(num: Int): Pair<MutableList<Map>, Orientation> {
-  val allMaps = mutableListOf(Map.A, Map.B, Map.C, Map.D)
+  val allMaps = mutableListOf(Map.A, Map.B, Map.C, Map.D, Map.E, Map.F)
   val allOrientations = mutableListOf(Orientation.Down, Orientation.Up)
-  allMaps.shuffle()
+
+  var selection = allMaps.subList(0, num)
+  do {
+    allMaps.shuffle()
+    selection = allMaps.subList(0, num)
+  } while (num == 2 && selection.containsAll(listOf(Map.E, Map.B)) || selection.containsAll(listOf(Map.F, Map.D)))
+
   allOrientations.shuffle()
-  return allMaps.subList(0, num) to allOrientations[0]
+  return selection to allOrientations[0]
 }
