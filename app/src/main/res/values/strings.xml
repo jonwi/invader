@@ -19,7 +19,7 @@
     <string name="abort">Abbrechen</string>
     <string name="building">Bauen</string>
     <string name="immigration">Hohe Immigration</string>
-    <string name="explore">Erkunden</string>
+    <string name="explore">Entdecken</string>
     <string name="ravage">Wüten</string>
     <string name="ablage">Ablage</string>
     <string name="sumpf">Sumpf</string>
@@ -30,9 +30,9 @@
     <string name="empty">Leer</string>
     <string name="neues_spiel">Neues Spiel</string>
     <string name="gewonnen">Verloren</string>
-    <string name="schweden">Königreich Schweden</string>
-    <string name="england">Königreich England</string>
-    <string name="brandenburg">Königreich Brandenburg-Preussen</string>
+    <string name="schweden">Schweden</string>
+    <string name="england">England</string>
+    <string name="brandenburg">Brandenburg-Preussen</string>
     <string name="none">Keine</string>
     <string name="nationen_einstellungen">Nationen Einstellungen</string>
     <string name="level">Level</string>
