@@ -42,10 +42,12 @@ class MainActivity : ComponentActivity() {
           val deck = remember { mutableStateOf(Deck(nationConfig.value)) }
           val discardCards = remember { mutableStateListOf<Card>() }
           val immigrationCards = remember { mutableStateListOf<Card>() }
+          val russiaHiddenCards = remember { mutableStateListOf<Card>() }
           val ravageCards = remember { mutableStateListOf<Card>() }
           val exploreCards = remember { mutableStateListOf(*deck.value.cards.toTypedArray()) }
           val buildingCards = remember { mutableStateListOf<Card>() }
           val revealed = remember { mutableStateOf(false) }
+          val russiaRevealed = remember { mutableStateOf(false) }
 
           val activity = LocalContext.current as Activity
           activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -72,18 +74,36 @@ class MainActivity : ComponentActivity() {
             }
           }
 
+          val onDropHandler = { card: Card, list: MutableList<Card> ->
+            ravageCards.remove(card)
+            if (exploreCards.remove(card)) {
+              revealed.value = false
+            }
+            immigrationCards.remove(card)
+            discardCards.remove(card)
+            buildingCards.remove(card)
+            russiaHiddenCards.remove(card)
+
+            list.add(card)
+          }
+
           val resetDeck = {
             exploreCards.removeAll(exploreCards)
             buildingCards.removeAll(buildingCards)
             ravageCards.removeAll(ravageCards)
             immigrationCards.removeAll(immigrationCards)
             discardCards.removeAll(discardCards)
+            russiaHiddenCards.removeAll(russiaHiddenCards)
 
             deck.value = Deck(nationConfig.value)
             exploreCards.addAll(deck.value.cards)
             if (nationConfig.value.nation == Nation.Schweden && nationConfig.value.level >= 4)
-              discardCards.add(exploreCards.removeAt(0))
+              discardCards.add(exploreCards.removeAt(exploreCards.lastIndex))
+            if (nationConfig.value.nation == Nation.Russland && nationConfig.value.level >= 5) {
+              russiaHiddenCards.addAll(listOf(deck.value.thirdRemoved, deck.value.secondRemoved))
+            }
             revealed.value = false
+            russiaRevealed.value = false
           }
 
           val setNationConfig = { nc: NationConfig ->
@@ -136,53 +156,29 @@ class MainActivity : ComponentActivity() {
                   exploreCard = exploreCards.toList(),
                   buildingCard = buildingCards.toList(),
                   immigrationCard = immigrationCards.toList(),
+                  russiaHiddenCards = russiaHiddenCards.toList(),
                   exploreClick = exploreClick,
                   revealed = revealed.value,
                   nationConfig = nationConfig.value,
                   setNationConfig = setNationConfig,
-                  addDiscardCard = { card ->
-                    ravageCards.remove(card)
-                    if (exploreCards.remove(card)) {
-                      revealed.value = false
-                    }
-                    immigrationCards.remove(card)
-                    discardCards.remove(card)
-                    buildingCards.remove(card)
-
-                    discardCards.add(card)
-                  },
+                  addDiscardCard = { card -> onDropHandler(card, discardCards) },
                   addRavageCard = { card ->
-                    ravageCards.remove(card)
-                    if (exploreCards.remove(card)) {
-                      revealed.value = false
-                    }
-                    immigrationCards.remove(card)
-                    discardCards.remove(card)
-                    buildingCards.remove(card)
-
-                    ravageCards.add(card)
+                    onDropHandler(card, ravageCards)
                   },
                   addBuildingCard = { card ->
-                    ravageCards.remove(card)
-                    if (exploreCards.remove(card)) {
-                      revealed.value = false
-                    }
-                    immigrationCards.remove(card)
-                    discardCards.remove(card)
-                    buildingCards.remove(card)
-                    buildingCards.add(card)
+                    onDropHandler(card, buildingCards)
                   },
                   addImmigrationCard = { card ->
-                    ravageCards.remove(card)
-                    if (exploreCards.remove(card)) {
-                      revealed.value = false
-                    }
-                    immigrationCards.remove(card)
-                    discardCards.remove(card)
-                    buildingCards.remove(card)
-
-                    immigrationCards.add(card)
+                    onDropHandler(card, immigrationCards)
                   },
+                  addExploreCard = { card ->
+                    onDropHandler(card, exploreCards)
+                    revealed.value = true
+                  },
+                  russiaRevealed = russiaRevealed.value,
+                  russiaOnClick = {
+                    russiaRevealed.value = !russiaRevealed.value
+                  }
                 )
               }
             }

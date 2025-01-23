@@ -14,7 +14,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,6 +26,9 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -90,7 +92,11 @@ fun Invader(
   addDiscardCard: (Card) -> Unit,
   addRavageCard: (Card) -> Unit,
   addBuildingCard: (Card) -> Unit,
+  addExploreCard: (Card) -> Unit,
   addImmigrationCard: (Card) -> Unit,
+  russiaHiddenCards: List<Card>,
+  russiaRevealed: Boolean,
+  russiaOnClick: () -> Unit,
 ) {
   val openNationDialog = remember { mutableStateOf(false) }
 
@@ -128,7 +134,11 @@ fun Invader(
       addRavageCard = addRavageCard,
       addBuildingCard = addBuildingCard,
       addImmigrationCard = addImmigrationCard,
+      addExploreCard = addExploreCard,
       openNationDialog = openNationDialogFunc,
+      russiaHiddenCards = russiaHiddenCards,
+      russiaRevealed = russiaRevealed,
+      russiaOnClick = russiaOnClick,
     )
   }
 }
@@ -138,7 +148,25 @@ fun Invader(
 )
 @Composable
 fun CardDisplayPreview() {
-  CardDisplay(listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.EMPTY), listOf(Card.JUNGLE), {}, false, NationConfig(Nation.Brandenburg, 3), {}, {}, {}, {}, {})
+  CardDisplay(
+    listOf(Card.EMPTY),
+    listOf(Card.EMPTY),
+    listOf(Card.EMPTY),
+    listOf(Card.EMPTY),
+    listOf(Card.JUNGLE),
+    {},
+    false,
+    NationConfig(Nation.Brandenburg, 3),
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    listOf(Card.EMPTY),
+    false,
+    {},
+  )
 }
 
 @Composable
@@ -155,8 +183,13 @@ fun CardDisplay(
   addRavageCard: (Card) -> Unit,
   addBuildingCard: (Card) -> Unit,
   addImmigrationCard: (Card) -> Unit,
+  addExploreCard: (Card) -> Unit,
   openNationDialog: () -> Unit,
+  russiaHiddenCards: List<Card>,
+  russiaRevealed: Boolean,
+  russiaOnClick: () -> Unit,
 ) {
+
   Column(
     modifier = Modifier.fillMaxWidth()
   ) {
@@ -178,7 +211,10 @@ fun CardDisplay(
           addCard = addBuildingCard
         )
         if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
-        Explore(cards = exploreCard, onClick = exploreClick, revealed)
+        Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
+        if (nationConfig.nation == Nation.Russland && nationConfig.level >= 5) {
+          RussiaDeck(cards = russiaHiddenCards, onClick = russiaOnClick, revealed = russiaRevealed)
+        }
       }
     }
   }
@@ -245,37 +281,27 @@ fun NationDialog(
     Text(text = stringResource(R.string.neues_spiel))
   }, text = {
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-        Button(
-          onClick = { nation.value = Nation.None },
-          modifier = Modifier.fillMaxWidth(),
-          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.None) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-        ) {
-          Text(stringResource(Nation.None.descId))
-        }
-        Button(
-          onClick = { nation.value = Nation.Brandenburg },
-          modifier = Modifier.fillMaxWidth(),
-          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Brandenburg) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-        ) {
-          Text(stringResource(Nation.Brandenburg.descId))
-        }
-        Button(
-          onClick = { nation.value = Nation.England },
-          modifier = Modifier.fillMaxWidth(),
-          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.England) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-        ) {
-          Text(stringResource(Nation.England.descId))
-        }
-        Button(
-          onClick = { nation.value = Nation.Schweden },
-          modifier = Modifier.fillMaxWidth(),
-          colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == Nation.Schweden) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-        ) {
-          Text(stringResource(Nation.Schweden.descId))
+      LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 200.dp),
+        modifier = Modifier.weight(1f)
+      ) {
+        items(Nation.entries.toList()) { n ->
+          Button(
+            onClick = { nation.value = n },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == n) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+          ) {
+            Text(stringResource(n.descId))
+          }
         }
       }
-      Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+          .fillMaxHeight()
+          .width(100.dp)
+      ) {
         Text("Level")
         Row(verticalAlignment = Alignment.CenterVertically) {
           IconButton(onClick = { level.intValue = max(1, level.intValue - 1) }) {
@@ -412,7 +438,33 @@ fun Ravage(cards: List<Card>, addCard: (Card) -> Unit) {
 
 
 @Composable
-fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
+fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean, addCard: (Card) -> Unit) {
+  CardDroppable(addCard) {
+    Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      Text(text = stringResource(R.string.cards) + cards.size.toString())
+      Box(modifier = Modifier.clickable(onClick = onClick)) {
+        DynamicDisplay(Card.FINISH, draggable = false)
+        if (revealed) {
+          Box {
+            for (card in cards) {
+              DynamicDisplay(card = card)
+            }
+          }
+        } else {
+          if (cards.isNotEmpty()) {
+            DynamicDisplay(Card.EMPTY, cards.last().gen, false)
+          }
+        }
+      }
+      Text(text = stringResource(R.string.explore))
+    }
+  }
+}
+
+@Composable
+fun RussiaDeck(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
   Column(
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
@@ -431,7 +483,7 @@ fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
         }
       }
     }
-    Text(text = stringResource(R.string.explore))
+    Text(text = stringResource(R.string.russland))
   }
 }
 
@@ -505,6 +557,7 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
       Card.MOUNTAIN_JUNGLE -> MountainJungle()
       Card.MOUNTAIN_SWAMP -> MountainSwamp()
       Card.SWAMP_JUNGLE -> SwampJungle()
+      Card.HABSBURG -> Habsburg()
     }
   }
 }
@@ -543,6 +596,23 @@ fun Coast(gen: Int = 1) {
 @Composable
 fun Finish() {
   SingleDisplayCard(color = CardColor.FINISH.color, text = stringResource(R.string.gewonnen))
+}
+
+@Preview
+@Composable
+fun Habsburg() {
+  Card(
+    border = BorderStroke(2.dp, Color.Black),
+  ) {
+    Box(
+      contentAlignment = Alignment.TopCenter,
+      modifier = Modifier
+        .padding(horizontal = 10.dp, vertical = 20.dp)
+        .fillMaxWidth()
+    ) {
+      Text(stringResource(R.string.habsburg))
+    }
+  }
 }
 
 @Preview
@@ -689,11 +759,11 @@ enum class Card(val gen: Int) {
   SWAMP(1), JUNGLE(1), MOUNTAIN(1), DESERT(1), COAST(2), SWAMP_NATION(2), JUNGLE_NATION(2), MOUNTAIN_NATION(2), DESERT_NATION(2), MOUNTAIN_DESERT(3), SWAMP_JUNGLE(3), DESERT_JUNGLE(3), MOUNTAIN_JUNGLE(
     3
   ),
-  DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0),
+  DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0), HABSBURG(0),
 }
 
 enum class Nation(val descId: Int) {
-  Brandenburg(R.string.brandenburg), England(R.string.england), Schweden(R.string.schweden), None(R.string.none);
+  Brandenburg(R.string.brandenburg), England(R.string.england), Schweden(R.string.schweden), None(R.string.none), Russland(R.string.russland), France(R.string.france), Habsburg(R.string.habsburg);
 }
 
 data class NationConfig(val nation: Nation, val level: Int)
@@ -705,14 +775,20 @@ class Deck(nationConfig: NationConfig) {
 
   private val deck: MutableList<Card> = emptyList<Card>().toMutableList()
 
+  private val _removedCards = mutableListOf<Card>()
+
+  var firstRemoved: Card
+  var secondRemoved: Card
+  var thirdRemoved: Card
+
   init {
     firstColors.shuffle()
     secondColors.shuffle()
     thirdColors.shuffle()
 
-    firstColors.removeAt(0)
-    secondColors.removeAt(0)
-    thirdColors.removeAt(0)
+    firstRemoved = firstColors.removeAt(0)
+    secondRemoved = secondColors.removeAt(0)
+    thirdRemoved = thirdColors.removeAt(0)
 
     when {
       nationConfig.nation == Nation.Brandenburg && nationConfig.level > 1 -> {
@@ -736,6 +812,27 @@ class Deck(nationConfig: NationConfig) {
         deck.addAll(thirdColors)
       }
 
+      nationConfig.nation == Nation.Russland && nationConfig.level >= 4 -> {
+        deck.addAll(firstColors)
+        for ((index, card) in secondColors.withIndex()) {
+          deck.add(card)
+          deck.add(thirdColors[index])
+        }
+        deck.add(thirdColors.last())
+      }
+
+      nationConfig.nation == Nation.Habsburg -> {
+        if (nationConfig.level >= 3) {
+          firstColors.removeAt(0)
+          deck.addAll(firstColors)
+          deck.addAll(secondColors)
+          deck.addAll(thirdColors)
+          if (nationConfig.level >= 5) {
+            deck.add(4, Card.HABSBURG)
+          }
+        }
+      }
+
       else -> {
         deck.addAll(firstColors)
         deck.addAll(secondColors)
@@ -745,5 +842,8 @@ class Deck(nationConfig: NationConfig) {
   }
 
   val cards get() = deck.toList().reversed()
+
+  val removedCards get() = _removedCards.toMutableList()
+
 
 }
