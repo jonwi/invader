@@ -89,7 +89,10 @@ class MainActivity : ComponentActivity() {
             immigrationCards.remove(card)
             discardCards.remove(card)
             buildingCards.remove(card)
-            russiaHiddenCards.remove(card)
+
+            if (russiaHiddenCards.remove(card)) {
+              russiaRevealed.value = false
+            }
 
             list.add(card)
           }
@@ -185,7 +188,9 @@ fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
     contentColor = MaterialTheme.colorScheme.primary,
     modifier = Modifier.height(40.dp)
   ) {
-    Row(modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
+    Row(modifier = Modifier
+      .fillMaxHeight()
+      .fillMaxWidth()) {
       IconButton(
         onClick = { onChange(Screens.Randomizer) },
         modifier = Modifier
