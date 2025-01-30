@@ -763,7 +763,9 @@ enum class Card(val gen: Int) {
 }
 
 enum class Nation(val descId: Int) {
-  Brandenburg(R.string.brandenburg), England(R.string.england), Schweden(R.string.schweden), None(R.string.none), Russland(R.string.russland), France(R.string.france), Habsburg(R.string.habsburg);
+  Brandenburg(R.string.brandenburg), England(R.string.england), Schweden(R.string.schweden), None(R.string.none), Russland(R.string.russland), France(R.string.france), Habsburg(R.string.habsburg), Schottland(
+    R.string.schottland
+  );
 }
 
 data class NationConfig(val nation: Nation, val level: Int)

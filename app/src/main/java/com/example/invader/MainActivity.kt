@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
@@ -131,6 +132,18 @@ class MainActivity : ComponentActivity() {
                     )
                   }
                   IconButton(
+                    onClick = { screen.value = Screens.Difficulty },
+                    modifier = Modifier
+                      .weight(1f, true)
+                      .background(if (screen.value == Screens.Difficulty) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+                  ) {
+                    Icon(
+                      Icons.Default.AutoGraph,
+                      contentDescription = "Randomize",
+                      tint = if (screen.value == Screens.Difficulty) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+                    )
+                  }
+                  IconButton(
                     onClick = { screen.value = Screens.Invaders },
                     modifier = Modifier
                       .weight(1f, true)
@@ -148,6 +161,7 @@ class MainActivity : ComponentActivity() {
           ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
               when (screen.value) {
+                Screens.Difficulty -> Difficulty()
                 Screens.Randomizer -> Randomizer()
                 Screens.Invaders -> Invader(
                   resetDeck = resetDeck,
@@ -192,4 +206,5 @@ class MainActivity : ComponentActivity() {
 enum class Screens {
   Invaders,
   Randomizer,
+  Difficulty,
 }
