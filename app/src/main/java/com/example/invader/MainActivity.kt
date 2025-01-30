@@ -8,11 +8,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
@@ -21,11 +22,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.compose.AppTheme
 
@@ -113,50 +119,7 @@ class MainActivity : ComponentActivity() {
 
           Scaffold(
             bottomBar = {
-              BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.height(40.dp)
-              ) {
-                Row {
-                  IconButton(
-                    onClick = { screen.value = Screens.Randomizer },
-                    modifier = Modifier
-                      .weight(1f, true)
-                      .background(if (screen.value == Screens.Randomizer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
-                  ) {
-                    Icon(
-                      Icons.Filled.Refresh,
-                      contentDescription = "Randomize",
-                      tint = if (screen.value == Screens.Randomizer) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
-                    )
-                  }
-                  IconButton(
-                    onClick = { screen.value = Screens.Difficulty },
-                    modifier = Modifier
-                      .weight(1f, true)
-                      .background(if (screen.value == Screens.Difficulty) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
-                  ) {
-                    Icon(
-                      Icons.Default.AutoGraph,
-                      contentDescription = "Randomize",
-                      tint = if (screen.value == Screens.Difficulty) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
-                    )
-                  }
-                  IconButton(
-                    onClick = { screen.value = Screens.Invaders },
-                    modifier = Modifier
-                      .weight(1f, true)
-                      .background(if (screen.value == Screens.Invaders) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
-                  ) {
-                    Icon(
-                      Icons.Filled.Home,
-                      contentDescription = "Invaders",
-                      tint = if (screen.value == Screens.Invaders) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
-                    )
-                  }
-                }
-              }
+              BottomBar(screen.value, { s -> screen.value = s })
             }
           ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
@@ -207,4 +170,62 @@ enum class Screens {
   Invaders,
   Randomizer,
   Difficulty,
+}
+
+@Composable
+@Preview
+fun BottomBarPreview() {
+  BottomBar(Screens.Difficulty, {})
+}
+
+@Composable
+fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
+  BottomAppBar(
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+    contentColor = MaterialTheme.colorScheme.primary,
+    modifier = Modifier.height(40.dp)
+  ) {
+    Row(modifier = Modifier.fillMaxHeight().fillMaxWidth()) {
+      IconButton(
+        onClick = { onChange(Screens.Randomizer) },
+        modifier = Modifier
+          .weight(1f, true)
+          .background(if (screen == Screens.Randomizer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+      ) {
+        Icon(
+          Icons.Default.Refresh,
+          contentDescription = "Randomize",
+          tint = if (screen == Screens.Randomizer) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+        )
+      }
+      VerticalDivider(thickness = 1.dp, color = Color.Black)
+
+      IconButton(
+        onClick = { onChange(Screens.Difficulty) },
+        modifier = Modifier
+          .weight(1f, true)
+          .background(if (screen == Screens.Difficulty) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+      ) {
+        Icon(
+          painter = painterResource(R.drawable.difficulty),
+          contentDescription = "Randomize",
+          tint = if (screen == Screens.Difficulty) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+        )
+      }
+      VerticalDivider(thickness = 1.dp, color = Color.Black)
+
+      IconButton(
+        onClick = { onChange(Screens.Invaders) },
+        modifier = Modifier
+          .weight(1f, true)
+          .background(if (screen == Screens.Invaders) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
+      ) {
+        Icon(
+          Icons.Filled.Home,
+          contentDescription = "Invaders",
+          tint = if (screen == Screens.Invaders) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+        )
+      }
+    }
+  }
 }
