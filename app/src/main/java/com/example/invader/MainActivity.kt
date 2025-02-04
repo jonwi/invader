@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -188,9 +187,11 @@ fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
     contentColor = MaterialTheme.colorScheme.primary,
     modifier = Modifier.height(40.dp)
   ) {
-    Row(modifier = Modifier
-      .fillMaxHeight()
-      .fillMaxWidth()) {
+    Row(
+      modifier = Modifier
+        .fillMaxHeight()
+        .fillMaxWidth()
+    ) {
       IconButton(
         onClick = { onChange(Screens.Randomizer) },
         modifier = Modifier
@@ -198,9 +199,9 @@ fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
           .background(if (screen == Screens.Randomizer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
       ) {
         Icon(
-          Icons.Default.Refresh,
+          painterResource(R.drawable.dice),
           contentDescription = "Randomize",
-          tint = if (screen == Screens.Randomizer) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+          tint = Color.Unspecified,
         )
       }
       VerticalDivider(thickness = 1.dp, color = Color.Black)
