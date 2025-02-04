@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -98,22 +100,241 @@ fun MapPreview() {
 
 @Composable
 fun Map(maps: List<Map>, orientation: Orientation) {
-  LazyHorizontalGrid(
-    rows = GridCells.Adaptive(minSize = 100.dp),
-    contentPadding = PaddingValues(10.dp),
-    modifier = Modifier.size(300.dp, 300.dp)
-  )
-  {
-    itemsIndexed(maps) { i, map ->
+  if (maps.size == 2) {
+    when (BoardSetup.entries.random()) {
+      BoardSetup.Flipped -> TwoPlayerMapFlipped(maps)
+      BoardSetup.Opposing -> TwoPlayerMapOpposing(maps)
+      BoardSetup.Fragment -> TwoPlayerMapFragment(maps)
+      BoardSetup.Standard -> TwoPlayerMapStandard(maps)
+    }
+  } else {
+    LazyHorizontalGrid(
+      rows = GridCells.Fixed(2),
+      contentPadding = PaddingValues(10.dp),
+      modifier = Modifier.size(300.dp, 300.dp)
+    )
+    {
+      itemsIndexed(maps) { i, map ->
+        Box(
+          modifier = Modifier
+            .width(100.dp)
+            .height(50.dp)
+            .rotate(orientation.degree(i)),
+          contentAlignment = Alignment.Center
+        ) {
+          Image(painterResource(map.drawable), "")
+          Text(
+            map.name,
+            style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+            fontSize = 50.sp,
+            color = MaterialTheme.colorScheme.primary
+          )
+        }
+      }
+    }
+  }
+}
+
+@Preview
+@Composable
+fun TwoPlayerMapStandardPreview() {
+  TwoPlayerMapStandard(listOf(Map.A, Map.B))
+}
+
+@Composable
+fun TwoPlayerMapStandard(maps: List<Map>) {
+  val first = maps[0]
+  val second = maps[1]
+  Box(modifier = Modifier
+    .width(300.dp)
+    .height(200.dp), contentAlignment = Alignment.Center) {
+    Box(
+      modifier = Modifier
+        .width(196.dp)
+        .height(182.dp)
+    ) {
       Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-          .size(90.dp, 90.dp)
-          .rotate(orientation.degree(i))
-          .padding(5.dp),
-        contentAlignment = Alignment.Center
+          .align(Alignment.TopEnd)
+          .width(150.dp)
       ) {
+        Image(painterResource(first.drawable), "")
         Text(
-          map.name,
+          first.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.BottomStart)
+          .rotate(180F)
+          .width(150.dp)
+      ) {
+        Image(painterResource(second.drawable), "")
+        Text(
+          second.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+    }
+  }
+}
+
+@Preview
+@Composable
+fun TwoPlayerMapFlippedPreview() {
+  TwoPlayerMapFlipped(listOf(Map.A, Map.B))
+}
+
+@Composable
+fun TwoPlayerMapFlipped(maps: List<Map>) {
+  val first = maps[0]
+  val second = maps[1]
+  Box(modifier = Modifier
+    .width(300.dp)
+    .height(200.dp), contentAlignment = Alignment.Center) {
+    Box(
+      modifier = Modifier
+        .width(197.dp)
+        .height(184.dp)
+    ) {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .width(150.dp)
+          .rotate(180F)
+      ) {
+        Image(painterResource(first.drawable), "")
+        Text(
+          first.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.BottomStart)
+          .width(150.dp)
+      ) {
+        Image(painterResource(second.drawable), "")
+        Text(
+          second.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+    }
+  }
+}
+
+
+@Preview
+@Composable
+fun TwoPlayerMapOpposingPreview() {
+  TwoPlayerMapOpposing(listOf(Map.A, Map.B))
+}
+
+@Composable
+fun TwoPlayerMapOpposing(maps: List<Map>) {
+  val first = maps[0]
+  val second = maps[1]
+  Box(modifier = Modifier
+    .width(300.dp)
+    .height(200.dp), contentAlignment = Alignment.Center) {
+    Box(
+      modifier = Modifier
+        .width(242.dp)
+    ) {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.TopStart)
+          .width(150.dp)
+      ) {
+        Image(painterResource(first.drawable), "")
+        Text(
+          first.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .width(150.dp)
+          .rotate(180F)
+          .offset(y = 1.dp)
+      ) {
+        Image(painterResource(second.drawable), "")
+        Text(
+          second.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+    }
+  }
+}
+
+@Preview
+@Composable
+fun TwoPlayerMapFragmentPreview() {
+  TwoPlayerMapFragment(listOf(Map.A, Map.B))
+}
+
+@Composable
+fun TwoPlayerMapFragment(maps: List<Map>) {
+  val first = maps[0]
+  val second = maps[1]
+  Box(modifier = Modifier
+    .height(200.dp)
+    .width(300.dp), contentAlignment = Alignment.Center) {
+    Box(
+      modifier = Modifier
+        .width(196.dp)
+        .height(185.dp)
+    ) {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.TopStart)
+          .width(150.dp)
+          .height(130.dp)
+          .rotate(-90F)
+          .offset(y = -(30.dp))
+      ) {
+        Image(painterResource(first.drawable), "")
+        Text(
+          first.name,
+          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+          fontSize = 50.sp,
+          color = MaterialTheme.colorScheme.primary
+        )
+      }
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+          .align(Alignment.TopEnd)
+          .width(150.dp)
+          .offset(y = 12.dp, x = 3.dp)
+          .rotate(150F)
+      ) {
+        Image(painterResource(second.drawable), "")
+        Text(
+          second.name,
           style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
           fontSize = 50.sp,
           color = MaterialTheme.colorScheme.primary
@@ -177,13 +398,13 @@ enum class Spirit(val drawable: Int, val descResource: Int) {
   Wald(R.drawable.tangles, R.string.wald),
 }
 
-enum class Map {
-  A,
-  B,
-  C,
-  D,
-  E,
-  F,
+enum class Map(val drawable: Int) {
+  A(R.drawable.board_a),
+  B(R.drawable.board_b),
+  C(R.drawable.board_c),
+  D(R.drawable.board_d),
+  E(R.drawable.board_e),
+  F(R.drawable.board_f),
 }
 
 enum class Orientation {
@@ -203,6 +424,13 @@ enum class Orientation {
         0f
     }
   }
+}
+
+enum class BoardSetup {
+  Standard,
+  Flipped,
+  Opposing,
+  Fragment,
 }
 
 fun randomSpirits(num: Int, easyOnly: Boolean): List<Spirit> {
