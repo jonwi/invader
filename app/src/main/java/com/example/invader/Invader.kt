@@ -470,7 +470,7 @@ fun RussiaDeck(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
   ) {
     Text(text = stringResource(R.string.cards) + cards.size.toString())
     Box(modifier = Modifier.clickable(onClick = onClick)) {
-      DynamicDisplay(Card.FINISH, draggable = false)
+      DynamicDisplay(Card.EMPTY, draggable = false)
       if (revealed) {
         Box {
           for (card in cards) {
