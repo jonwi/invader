@@ -1024,15 +1024,13 @@ class Deck(nationConfig: NationConfig) {
         deck.add(thirdColors.last())
       }
 
-      nationConfig.nation == Nation.Habsburg -> {
-        if (nationConfig.level >= 3) {
-          firstColors.removeAt(0)
-          deck.addAll(firstColors)
-          deck.addAll(secondColors)
-          deck.addAll(thirdColors)
-          if (nationConfig.level >= 5) {
-            deck.add(4, Card.HABSBURG)
-          }
+      nationConfig.nation == Nation.Habsburg && nationConfig.level >= 3 -> {
+        firstColors.removeAt(0)
+        deck.addAll(firstColors)
+        deck.addAll(secondColors)
+        deck.addAll(thirdColors)
+        if (nationConfig.level >= 5) {
+          deck.add(4, Card.HABSBURG)
         }
       }
 
