@@ -124,7 +124,7 @@ class MainActivity : ComponentActivity() {
 
           Scaffold(
             bottomBar = {
-              BottomBar(screen.value, { s -> screen.value = s })
+              BottomBar(screen.value) { s -> screen.value = s }
             }
           ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
@@ -186,7 +186,7 @@ enum class Screens {
 @Composable
 @Preview
 fun BottomBarPreview() {
-  BottomBar(Screens.Difficulty, {})
+  BottomBar(Screens.Difficulty) {}
 }
 
 /**

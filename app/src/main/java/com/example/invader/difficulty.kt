@@ -56,7 +56,7 @@ fun Difficulty() {
 
 /**
  * View of a setup
- * @param setup triple of the current nationconfig, the scenario and the difficulty
+ * @param setup triple of the current nation config, the scenario and the difficulty
  */
 @Composable
 fun Setup(setup: Triple<NationConfig?, Scenario?, Int?>) {
@@ -160,7 +160,7 @@ fun IntSelector(min: Int, max: Int, value: Int, onChange: (Int) -> Unit) {
  * @param upperDifficulty result will have at most this difficulty
  * @param usesNation if it should return a nation
  * @param usesScenarios if it should return a scenario
- * @return NationConfig and Scenario with Difficuly if there is one within the bounds. Parts will be null if not requested/not existing
+ * @return NationConfig and Scenario with Difficulty if there is one within the bounds. Parts will be null if not requested/not existing
  */
 private fun randomizeSetup(lowerDifficulty: Int, upperDifficulty: Int, usesNation: Boolean, usesScenarios: Boolean): Triple<NationConfig?, Scenario?, Int?> {
   if (usesNation && usesScenarios) {
@@ -195,7 +195,7 @@ private fun scenariosByDifficulty(lowerDifficulty: Int, upperDifficulty: Int): L
 }
 
 /**
- * Represents a Scenario of Spirit Island. Comes with descrption as string resource and difficulty as from:
+ * Represents a Scenario of Spirit Island. Comes with description as string resource and difficulty as from:
  * https://docs.google.com/spreadsheets/d/13YKGn8nBPD3b84pazu4iedj99wowHuXkC_afTG1wf4U/edit?gid=906893594#gid=906893594
  */
 enum class Scenario(val desc: Int, val difficulty: Int) {
@@ -215,7 +215,7 @@ enum class Scenario(val desc: Int, val difficulty: Int) {
 }
 
 /**
- * @return NationConfig and Difficulty of that or null if there is noone in bounds
+ * @return NationConfig and Difficulty of that or null if there is none in bounds
  */
 private fun nationRandomize(lowerDifficulty: Int, upperDifficulty: Int): Pair<NationConfig, Int>? {
   val configs = mutableListOf<Pair<NationConfig, Int>>()

@@ -202,7 +202,7 @@ fun MapView(maps: List<Map>, orientation: Orientation) {
  * Container for two maps. It will have a fixed size.
  */
 @Composable
-fun TwoPlayerMapContainer(content: @Composable() (BoxScope.() -> Unit)) {
+fun TwoPlayerMapContainer(content: @Composable (BoxScope.() -> Unit)) {
   Box(
     modifier = Modifier
       .width(352.dp)
@@ -416,7 +416,7 @@ fun Spirits(spirits: List<Spirit>) {
 }
 
 /**
- * Respresents a game or expansion of spirit island
+ * Represents a game or expansion of spirit island
  */
 enum class Expansion(val desc: Int, val icon: Int) {
   Base(R.string.base, R.drawable.spirit_island),
@@ -428,7 +428,7 @@ enum class Expansion(val desc: Int, val icon: Int) {
 }
 
 /**
- * Respresents the complexity rating of a spirit.
+ * Represents the complexity rating of a spirit.
  * see also [Spirit]
  */
 enum class Complexity {
@@ -439,7 +439,7 @@ enum class Complexity {
 }
 
 /**
- * Respresents a playable spirit in spirit island
+ * Represents a playable spirit in spirit island
  */
 enum class Spirit(val drawable: Int, val descResource: Int, val expansion: Expansion, val complexity: Complexity) {
   Erde(R.drawable.resilience, R.string.erde, Expansion.Base, Complexity.Low),
@@ -516,7 +516,7 @@ enum class Orientation {
 }
 
 /**
- * Represents a boad setup for a two player game
+ * Represents a board setup for a two player game
  */
 enum class BoardSetupTwoPlayer {
   Standard,

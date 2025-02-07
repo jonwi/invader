@@ -87,7 +87,7 @@ import kotlin.math.min
  * @param immigrationCard all cards that sit on top of the immigration pile
  * @param exploreClick handler of the click event on top of the explore pile
  * @param revealed True of the top card of the explore pile is revealed
- * @param nationConfig configuration of the nation setup that controls visible and useable things
+ * @param nationConfig configuration of the nation setup that controls visible and usable things
  * @param setNationConfig handler that changes the nation config
  * @param addDiscardCard handler that adds card to the discard pile
  * @param addRavageCard handler that adds card to the ravage pile
@@ -202,7 +202,7 @@ fun CardDisplayPreview() {
  * @param immigrationCard all cards that sit on top of the immigration pile
  * @param exploreClick handler of the click event on top of the explore pile
  * @param revealed True of the top card of the explore pile is revealed
- * @param nationConfig configuration of the nation setup that controls visible and useable things
+ * @param nationConfig configuration of the nation setup that controls visible and usable things
  * @param addDiscardCard handler that adds card to the discard pile
  * @param addRavageCard handler that adds card to the ravage pile
  * @param addBuildingCard handler that adds card to the building pile
@@ -459,7 +459,7 @@ fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
  */
 @Composable
 fun CardStack(cards: List<Card>) {
-  Box() {
+  Box {
     DynamicDisplay(Card.EMPTY, draggable = false)
     Column(verticalArrangement = Arrangement.spacedBy(-(185).dp)) {
       for ((index, card) in cards.withIndex()) {
@@ -704,7 +704,7 @@ fun Mountain(gen: Int = 2, nation: Boolean = false) {
 /**
  * A desert card
  * @param gen generation of the desert card
- * @param nation True if this has the escalatino effect on it
+ * @param nation True if this has the escalating effect on it
  */
 @Preview
 @Composable
@@ -949,7 +949,7 @@ enum class Card(val gen: Int) {
 }
 
 /**
- * Represents a adverserary of the game spirit island
+ * Represents a adversary of the game spirit island
  */
 enum class Nation(val descId: Int, val flag: Int) {
   Brandenburg(R.string.brandenburg, R.drawable.brand_prussia_flag),
@@ -963,7 +963,7 @@ enum class Nation(val descId: Int, val flag: Int) {
 }
 
 /**
- * The configuration of a adverseray that has both nation and the level
+ * The configuration of a adversary that has both nation and the level
  */
 data class NationConfig(val nation: Nation, val level: Int)
 
@@ -978,9 +978,7 @@ class Deck(nationConfig: NationConfig) {
 
   private val deck: MutableList<Card> = emptyList<Card>().toMutableList()
 
-  private val _removedCards = mutableListOf<Card>()
-
-  var firstRemoved: Card
+  private var firstRemoved: Card
   var secondRemoved: Card
   var thirdRemoved: Card
 
@@ -1046,11 +1044,6 @@ class Deck(nationConfig: NationConfig) {
    * All the cards of the deck where the first card is the bottom of the deck
    */
   val cards get() = deck.toList().reversed()
-
-  /**
-   * All cards that where removed during the setup process
-   */
-  val removedCards get() = _removedCards.toMutableList()
 
 
 }
