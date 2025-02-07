@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.compose.AppTheme
 
+/**
+ * Main entry point of the app
+ */
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -168,18 +171,30 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+/**
+ * Represents a screen of the app
+ */
 enum class Screens {
   Invaders,
   Randomizer,
   Difficulty,
 }
 
+/**
+ * Preview of [BottomBar]
+ */
 @Composable
 @Preview
 fun BottomBarPreview() {
   BottomBar(Screens.Difficulty, {})
 }
 
+/**
+ * Navigation bar of the App
+ *
+ * @param screen current screen
+ * @param onChange change of the current screen
+ */
 @Composable
 fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
   BottomAppBar(

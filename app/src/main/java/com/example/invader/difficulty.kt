@@ -30,6 +30,9 @@ import java.util.stream.Collectors
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Composable that lets the user randomize the setup of the game by selecting a range of difficulty and of nation and/or scenarios should be used.
+ */
 @Composable
 @Preview
 fun Difficulty() {
@@ -51,6 +54,10 @@ fun Difficulty() {
 
 }
 
+/**
+ * View of a setup
+ * @param setup triple of the current nationconfig, the scenario and the difficulty
+ */
 @Composable
 fun Setup(setup: Triple<NationConfig?, Scenario?, Int?>) {
   Column {
@@ -67,12 +74,24 @@ fun Setup(setup: Triple<NationConfig?, Scenario?, Int?>) {
   }
 }
 
+/**
+ * Preview of [DifficultySelector]
+ */
 @Preview
 @Composable
 fun DifficultySelectorPreview() {
   DifficultySelector(1, 2, initNation = false, initScenario = true, onSelection = { _, _, _, _ -> })
 }
 
+/**
+ * Selector of difficulty range
+ *
+ * @param initialLow initial value for the min value of the range
+ * @param initialHigh initial value of the max value of the range
+ * @param initNation True if nation will be used
+ * @param initScenario True if scenario will be used
+ * @param onSelection on change of the range or nation/scenario values
+ */
 @Composable
 fun DifficultySelector(initialLow: Int, initialHigh: Int, initNation: Boolean, initScenario: Boolean, onSelection: (Int, Int, Boolean, Boolean) -> Unit) {
   val low = remember { mutableIntStateOf(initialLow) }
@@ -111,6 +130,14 @@ fun DifficultySelector(initialLow: Int, initialHigh: Int, initNation: Boolean, i
   }
 }
 
+/**
+ * Integer selector
+ *
+ * @param min min number that can be selected
+ * @param max max number that can be selected
+ * @param value current value that is selected
+ * @param onChange callback when number is changed
+ */
 @Composable
 fun IntSelector(min: Int, max: Int, value: Int, onChange: (Int) -> Unit) {
   Row(verticalAlignment = Alignment.CenterVertically) {

@@ -76,7 +76,28 @@ import androidx.graphics.shapes.toPath
 import kotlin.math.max
 import kotlin.math.min
 
-
+/**
+ * Composable that shows the invader deck in its current state and lets the user manipulate that.
+ *
+ * @param resetDeck handler to reset the deck
+ * @param discardCard all cards that sit on top of the discard pile
+ * @param ravageCard all cards that sit on top of the ravage pile
+ * @param exploreCard all cards that sit on top of the explore pile
+ * @param buildingCard all cards that sit on top of the building pile
+ * @param immigrationCard all cards that sit on top of the immigration pile
+ * @param exploreClick handler of the click event on top of the explore pile
+ * @param revealed True of the top card of the explore pile is revealed
+ * @param nationConfig configuration of the nation setup that controls visible and useable things
+ * @param setNationConfig handler that changes the nation config
+ * @param addDiscardCard handler that adds card to the discard pile
+ * @param addRavageCard handler that adds card to the ravage pile
+ * @param addBuildingCard handler that adds card to the building pile
+ * @param addExploreCard handler that adds card to the explore pile
+ * @param addImmigrationCard handler that adds card to the immigration pile
+ * @param russiaHiddenCards list of cards that are on top of the russia pile
+ * @param russiaRevealed True if the top card on the russia pile is revealed
+ * @param russiaOnClick handler of the click event of the russia pile
+ */
 @Composable
 fun Invader(
   resetDeck: () -> Unit,
@@ -143,6 +164,9 @@ fun Invader(
   }
 }
 
+/**
+ * preview of [CardDisplay]
+ */
 @Preview(
   device = "spec:width=411dp,height=700dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
 )
@@ -169,6 +193,25 @@ fun CardDisplayPreview() {
   )
 }
 
+/**
+ * Component that shows the invader card piles
+ * @param discardCard all cards that sit on top of the discard pile
+ * @param ravageCard all cards that sit on top of the ravage pile
+ * @param exploreCard all cards that sit on top of the explore pile
+ * @param buildingCard all cards that sit on top of the building pile
+ * @param immigrationCard all cards that sit on top of the immigration pile
+ * @param exploreClick handler of the click event on top of the explore pile
+ * @param revealed True of the top card of the explore pile is revealed
+ * @param nationConfig configuration of the nation setup that controls visible and useable things
+ * @param addDiscardCard handler that adds card to the discard pile
+ * @param addRavageCard handler that adds card to the ravage pile
+ * @param addBuildingCard handler that adds card to the building pile
+ * @param addExploreCard handler that adds card to the explore pile
+ * @param addImmigrationCard handler that adds card to the immigration pile
+ * @param russiaHiddenCards list of cards that are on top of the russia pile
+ * @param russiaRevealed True if the top card on the russia pile is revealed
+ * @param russiaOnClick handler of the click event of the russia pile
+ */
 @Composable
 fun CardDisplay(
   discardCard: List<Card>,
@@ -220,6 +263,9 @@ fun CardDisplay(
   }
 }
 
+/**
+ * Preview of [Bottom]
+ */
 @Composable
 @Preview(
   device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
@@ -228,6 +274,11 @@ fun BottomPreview() {
   Bottom(NationConfig(Nation.Brandenburg, 2)) {}
 }
 
+/**
+ * Composable with nation config
+ * @param nationConfig current nation config
+ * @param openNationDialog handler to open the nation config dialog
+ */
 @Composable
 fun Bottom(
   nationConfig: NationConfig,
@@ -249,6 +300,9 @@ fun Bottom(
   }
 }
 
+/**
+ * Preview for [NationDisplay]
+ */
 @Composable
 @Preview(
   device = "spec:width=411dp,height=891dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
@@ -257,6 +311,10 @@ fun NationDisplayPreview() {
   NationDisplay(NationConfig(Nation.Brandenburg, 1))
 }
 
+/**
+ * Composable that shows the current nation config
+ * @param nationConfig current nation config
+ */
 @Composable
 fun NationDisplay(nationConfig: NationConfig) {
   Column(horizontalAlignment = Alignment.Start) {
@@ -268,6 +326,12 @@ fun NationDisplay(nationConfig: NationConfig) {
   }
 }
 
+/**
+ * Dialog that lets the user choose a nation config
+ * @param onDismissRequest handler on dismissing the dialog
+ * @param onConfirmation handler on confirming the dialog
+ * @param currentConfig initial config of the dialog
+ */
 @Composable
 fun NationDialog(
   onDismissRequest: () -> Unit,
@@ -332,6 +396,9 @@ fun NationDialog(
   })
 }
 
+/**
+ * This is a arrow that is used to separate the piles of cards
+ */
 @Preview
 @Composable
 fun Splitter(width: Dp = 20.dp, color: Color = Color.Black, onClick: () -> Unit = {}) {
@@ -358,6 +425,11 @@ fun Splitter(width: Dp = 20.dp, color: Color = Color.Black, onClick: () -> Unit 
   }
 }
 
+/**
+ * Droppable Composable for a card
+ * @param addCard on drop handler of a card
+ * @param content content of the droppable
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
@@ -381,6 +453,10 @@ fun CardDroppable(addCard: (Card) -> Unit, content: @Composable (() -> Unit)) {
   }
 }
 
+/**
+ * Composable that is a pile of cards
+ * @param cards list of cards with the first card being the bottom card
+ */
 @Composable
 fun CardStack(cards: List<Card>) {
   Box() {
@@ -397,7 +473,11 @@ fun CardStack(cards: List<Card>) {
   }
 }
 
-
+/**
+ * Pile of immigration cards
+ * @param cards list of cards with bottom one being the first card
+ * @param addCard handler that is called when a card is added to this pile
+ */
 @Composable
 fun Immigration(cards: List<Card>, addCard: (Card) -> Unit) {
   CardDroppable(addCard) {
@@ -409,7 +489,11 @@ fun Immigration(cards: List<Card>, addCard: (Card) -> Unit) {
   }
 }
 
-
+/**
+ * Pile of building cards
+ * @param cards list of cards where the first card is the bottom one
+ * @param addCard handler that is called when a card is added to this pile
+ */
 @Composable
 fun Building(cards: List<Card>, addCard: (Card) -> Unit) {
   CardDroppable(addCard) {
@@ -423,6 +507,11 @@ fun Building(cards: List<Card>, addCard: (Card) -> Unit) {
   }
 }
 
+/**
+ * Pile of ravage cards
+ * @param cards list of cards where the first card is the bottom card
+ * @param addCard handler to add a card to the pile
+ */
 @Composable
 fun Ravage(cards: List<Card>, addCard: (Card) -> Unit) {
   CardDroppable(addCard) {
@@ -436,7 +525,14 @@ fun Ravage(cards: List<Card>, addCard: (Card) -> Unit) {
   }
 }
 
-
+/**
+ * Pile of explore cards
+ *
+ * @param cards list of cards where the first card is the bottom card
+ * @param onClick handler of the on click of the pile
+ * @param revealed if the top card of the pile is revealed
+ * @param addCard handler to add card to pile
+ */
 @Composable
 fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean, addCard: (Card) -> Unit) {
   CardDroppable(addCard) {
@@ -463,6 +559,13 @@ fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean, addCard: 
   }
 }
 
+/**
+ * The pile of cards for russia
+ *
+ * @param cards pile of cards where the first one is the bottom card of the deck
+ * @param onClick handler of the onclick event
+ * @param revealed True if the first card is revealed
+ */
 @Composable
 fun RussiaDeck(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
   Column(
@@ -487,6 +590,14 @@ fun RussiaDeck(cards: List<Card>, onClick: () -> Unit, revealed: Boolean) {
   }
 }
 
+/**
+ * Pile of discard cards
+ *
+ * @param cards pile of cards where the first one is the bottom card
+ * @param addCard handler to add card to the pile
+ * @param nationConfig current nation config
+ * @param openNationDialog handler to open the nation config dialog
+ */
 @Composable
 fun Discard(cards: List<Card>, addCard: (Card) -> Unit, nationConfig: NationConfig, openNationDialog: () -> Unit) {
   CardDroppable(addCard) {
@@ -519,6 +630,12 @@ fun Discard(cards: List<Card>, addCard: (Card) -> Unit, nationConfig: NationConf
   }
 }
 
+/**
+ * Display of a card
+ * @param card card to be displayed
+ * @param gen invader generation if there is any
+ * @param draggable if the card is draggable
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
@@ -562,42 +679,72 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
   }
 }
 
+/**
+ * A swamp card
+ * @param gen generation of the swamp
+ * @param nation True if this has the escalation effect on it
+ */
 @Preview
 @Composable
 fun Swamp(gen: Int = 1, nation: Boolean = false) {
   SingleDisplayCard(color = CardColor.SWAMP.color, text = stringResource(R.string.sumpf), generation = gen, nation = nation)
 }
 
+/**
+ * A mountain card
+ * @param gen generation of the mountain
+ * @param nation True if this has the escalation effect
+ */
 @Preview
 @Composable
 fun Mountain(gen: Int = 2, nation: Boolean = false) {
   SingleDisplayCard(color = CardColor.MOUNTAIN.color, text = stringResource(R.string.berg), generation = gen, nation = nation)
 }
 
+/**
+ * A desert card
+ * @param gen generation of the desert card
+ * @param nation True if this has the escalatino effect on it
+ */
 @Preview
 @Composable
 fun Desert(gen: Int = 1, nation: Boolean = false) {
   SingleDisplayCard(color = CardColor.DESERT.color, text = stringResource(R.string.desert), generation = gen, nation = nation)
 }
 
+/**
+ * A jungle card
+ * @param gen generation of the jungle card
+ * @param nation True if this has the escalation effect on it
+ */
 @Preview
 @Composable
 fun Jungle(gen: Int = 1, nation: Boolean = false) {
   SingleDisplayCard(color = CardColor.JUNGLE.color, text = stringResource(R.string.dschungel), generation = gen, nation = nation)
 }
 
+/**
+ * A coast card
+ * @param gen generation of the jungle card
+ */
 @Preview
 @Composable
 fun Coast(gen: Int = 1) {
   SingleDisplayCard(color = CardColor.COAST.color, text = stringResource(R.string.coast), generation = gen)
 }
 
+/**
+ * Bottom of the explore deck
+ */
 @Preview
 @Composable
 fun Finish() {
   SingleDisplayCard(color = CardColor.FINISH.color, text = stringResource(R.string.gewonnen))
 }
 
+/**
+ * Card that must be added when playing with [Nation.Habsburg]
+ */
 @Preview
 @Composable
 fun Habsburg() {
@@ -615,6 +762,10 @@ fun Habsburg() {
   }
 }
 
+/**
+ * Empty or not revealed card
+ * @param gen generation of the card
+ */
 @Preview
 @Composable
 fun Empty(gen: Int? = 2) {
@@ -640,44 +791,67 @@ fun Empty(gen: Int? = 2) {
   }
 }
 
+/**
+ * Desert and Jungle card
+ */
 @Preview
 @Composable
 fun DesertJungle() {
   DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.desert), text2 = stringResource(R.string.dschungel))
 }
 
+/**
+ * Desert and Swamp card
+ */
 @Preview
 @Composable
 fun DesertSwamp() {
   DoubleDisplayCard(color1 = CardColor.DESERT.color, color2 = CardColor.SWAMP.color, text1 = stringResource(R.string.desert), text2 = stringResource(R.string.sumpf))
 }
 
+/**
+ * Mountain and Desert card
+ */
 @Preview
 @Composable
 fun MountainDesert() {
   DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.DESERT.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.desert))
 }
 
+/**
+ * Mountain and Jungle card
+ */
 @Preview
 @Composable
 fun MountainJungle() {
   DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.dschungel))
 }
 
-
+/**
+ * Mountain and Swamp card
+ */
 @Preview
 @Composable
 fun MountainSwamp() {
   DoubleDisplayCard(color1 = CardColor.MOUNTAIN.color, color2 = CardColor.SWAMP.color, text1 = stringResource(R.string.berg), text2 = stringResource(R.string.sumpf))
 }
 
+/**
+ * Swamp and Jungle card
+ */
 @Preview
 @Composable
 fun SwampJungle() {
   DoubleDisplayCard(color1 = CardColor.SWAMP.color, color2 = CardColor.JUNGLE.color, text1 = stringResource(R.string.sumpf), text2 = stringResource(R.string.dschungel))
 }
 
-
+/**
+ * Composable that has two different biomes on it
+ * @param color1 color of the first biome
+ * @param color2 color of the second biome
+ * @param text1 text of the first biome
+ * @param text2 text of the second biome
+ */
 @Composable
 fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String) {
   Card(
@@ -709,6 +883,13 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
   }
 }
 
+/**
+ * A single card that is displayed
+ * @param color color of the card
+ * @param text text of the card
+ * @param generation generation of the card
+ * @param nation True if this contains the escalation effect
+ */
 @Composable
 fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, nation: Boolean = false) {
   Card(
@@ -750,11 +931,16 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, natio
   }
 }
 
-
+/**
+ * Represents the different biomes and their used color schemes
+ */
 enum class CardColor(val color: Color) {
   SWAMP(Color(0, 200, 200)), COAST(Color(55, 100, 178)), MOUNTAIN(Color(100, 100, 100)), DESERT(Color(196, 194, 98)), JUNGLE(Color(14, 81, 7)), FINISH(Color(250, 250, 250)),
 }
 
+/**
+ * Represents a card of the invader deck
+ */
 enum class Card(val gen: Int) {
   SWAMP(1), JUNGLE(1), MOUNTAIN(1), DESERT(1), COAST(2), SWAMP_NATION(2), JUNGLE_NATION(2), MOUNTAIN_NATION(2), DESERT_NATION(2), MOUNTAIN_DESERT(3), SWAMP_JUNGLE(3), DESERT_JUNGLE(3), MOUNTAIN_JUNGLE(
     3
@@ -762,6 +948,9 @@ enum class Card(val gen: Int) {
   DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0), HABSBURG(0),
 }
 
+/**
+ * Represents a adverserary of the game spirit island
+ */
 enum class Nation(val descId: Int, val flag: Int) {
   Brandenburg(R.string.brandenburg, R.drawable.brand_prussia_flag),
   England(R.string.england, R.drawable.england_wrinkledflag),
@@ -773,8 +962,15 @@ enum class Nation(val descId: Int, val flag: Int) {
   Schottland(R.string.schottland, R.drawable.scotland_wrinkledflag)
 }
 
+/**
+ * The configuration of a adverseray that has both nation and the level
+ */
 data class NationConfig(val nation: Nation, val level: Int)
 
+/**
+ * A invader deck
+ * @param nationConfig config of the nation that may change the setup of the invader cards
+ */
 class Deck(nationConfig: NationConfig) {
   private val firstColors = mutableListOf(Card.SWAMP, Card.JUNGLE, Card.MOUNTAIN, Card.DESERT)
   private val secondColors = mutableListOf(Card.SWAMP_NATION, Card.JUNGLE_NATION, Card.DESERT_NATION, Card.COAST, Card.MOUNTAIN_NATION)
@@ -848,8 +1044,14 @@ class Deck(nationConfig: NationConfig) {
     }
   }
 
+  /**
+   * All the cards of the deck where the first card is the bottom of the deck
+   */
   val cards get() = deck.toList().reversed()
 
+  /**
+   * All cards that where removed during the setup process
+   */
   val removedCards get() = _removedCards.toMutableList()
 
 
