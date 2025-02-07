@@ -762,10 +762,15 @@ enum class Card(val gen: Int) {
   DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0), HABSBURG(0),
 }
 
-enum class Nation(val descId: Int) {
-  Brandenburg(R.string.brandenburg), England(R.string.england), Schweden(R.string.schweden), None(R.string.none), Russland(R.string.russland), France(R.string.france), Habsburg(R.string.habsburg), Schottland(
-    R.string.schottland
-  );
+enum class Nation(val descId: Int, val flag: Int) {
+  Brandenburg(R.string.brandenburg, R.drawable.brand_prussia_flag),
+  England(R.string.england, R.drawable.england_wrinkledflag),
+  Schweden(R.string.schweden, R.drawable.sweden_wrinkledflag),
+  None(R.string.none, R.drawable.none_wrinkledflag),
+  Russland(R.string.russland, R.drawable.russia_wrinkledflag),
+  France(R.string.france, R.drawable.france_wrinkledflag),
+  Habsburg(R.string.habsburg, R.drawable.habsburg_monarchy__wrinkledflag),
+  Schottland(R.string.schottland, R.drawable.scotland_wrinkledflag)
 }
 
 data class NationConfig(val nation: Nation, val level: Int)
