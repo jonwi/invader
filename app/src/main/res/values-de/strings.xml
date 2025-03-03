@@ -1,6 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--  Randomizer  -->
-    <string name="app_name" translatable="false">Spirit Island Companion</string>
+    <string name="app_name">Spirit Island Companion</string>
     <string name="erde">Lebenskraft der Erde</string>
     <string name="schatten">Flackernde Schatten</string>
     <string name="blitz">Pfeilschneller Blitzschlag</string>
@@ -8,11 +8,9 @@
     <string name="ozean">Hunger des Ozeans</string>
     <string name="bote">Bote der Albträume</string>
     <string name="donner">Stimme des Donners</string>
-    <string name="wald">Wild wucherndes Grün</string>string>
+    <string name="wald">Wild wucherndes Grün</string>
     <string name="easy">Nur einfache Geister</string>
     <string name="randomize">Zufall</string>
-
-    <!--  Invader  -->
     <string name="new_game">Neues Spiel</string>
     <string name="new_game_dialog">Es wird neu gemischt und kann nicht mehr rückgängig gemacht werden.</string>
     <string name="confirm">Bestätigen</string>
@@ -59,39 +57,26 @@
     <string name="bis">Bis:</string>
     <string name="nation">Nation</string>
     <string name="scenario">Scenario</string>
-    <string name="keeper">Keeper of the Forbidden Wilds</string>
-    <string name="behemoth">Ember-Eyed Behemoth</string>
-    <string name="darkness">Breath of Darkness Down Your Spine</string>
-    <string name="downpour">Downpour Drenches the World</string>
-    <string name="earthquakes">Dances Up Earthquakes</string>
-    <string name="eyes">Eyes watch from the Trees</string>
-    <string name="fangs">Sharp Fangs Behind the Leaves</string>
-    <string name="finder">Finder of Paths Unseen</string>
-    <string name="fractured">Fractured Days Split the Sky</string>
-    <string name="swamp">Fathomless Mud of the Swamp</string>
-    <string name="trickster">Grinning Trickster Stirs Up Trouble</string>
-    <string name="wildfire">Heart of the Wildfire</string>
-    <string name="hearth">Hearth-Vigil</string>
-    <string name="lure">Lure of the Deep Wilderness</string>
-    <string name="minds">Many Minds Move as One</string>
-    <string name="gaze">Relentless Gaze of the Sun</string>
-    <string name="heat">Rising Heat of Stone and Sand</string>
-    <string name="serpent">Serpent Slumbering Beneath the Island</string>
-    <string name="memory">Shifting Memory of Ages</string>
-    <string name="mist">Shroud of Silent Mist</string>
-    <string name="starlight">Starlight Seeks Its Form</string>
-    <string name="stone">Stone\'s Unyielding Defiance</string>
-    <string name="whirlwind">Sun-Bright Whirlwind</string>
-    <string name="roots">Towering Roots of the Jungle</string>
-    <string name="vengeance">Vengeance as a Burning Plague</string>
-    <string name="volcano">Volcano Looming High</string>
-    <string name="voice">Wandering Voice Keens Delirium</string>
-    <string name="wounded">Wounded Waters Bleeding</string>
-    <string name="teeth">Devouring Teeth Lurk Underfoot</string>
     <string name="base">Basisspiel</string>
     <string name="branchandclaw">Ast und Tatze</string>
     <string name="jaggedearth">Zerklüftete Erde</string>
     <string name="featherandflame">Feder und Flamme</string>
     <string name="horizons">Horizons</string>
     <string name="natureincarnate">Natur Erwacht</string>
+    <string name="lure">Verlockung der Tiefsten Wälder</string>
+    <string name="minds">Viele Bewegen Sich Als Eines</string>
+    <string name="downpour">Sturzregen Durchnässt die Welt</string>
+    <string name="keeper">Hüter der Verbotenen Wildnis</string>
+    <string name="trickster">Grinsender Gestaltwandler Macht Ärger</string>
+    <string name="vengeance">Rache in Gestalt Brennender Seuche</string>
+    <string name="volcano">Hoch Aufragender Vulkan</string>
+    <string name="memory">Wandelndes Ur-Gedächtnis</string>
+    <string name="mist">Nebel des Leisen Todes</string>
+    <string name="starlight">Sternenlicht sucht Gestalt</string>
+    <string name="fangs">Reisszähne im Dickicht</string>
+    <string name="stone">Trotzendes Felsgestein</string>
+    <string name="finder">Finder Unsichtbarer Wege</string>
+    <string name="fractured">Tagessplitter Teilen den Himmel</string>
+    <string name="serpent">Unter der Insel Schlummernde Schlange</string>
+    <string name="wildfire">Seele des Flächenbrands</string>
 </resources>
