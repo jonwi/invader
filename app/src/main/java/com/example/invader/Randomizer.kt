@@ -63,7 +63,7 @@ class RandomizerViewModel : ViewModel() {
   /**
    * randomized list of maps and their orientation
    */
-  var map by mutableStateOf(emptyList<Map>() to Orientation.Up)
+  var map by mutableStateOf(emptyList<Map>())
 
   /**
    * randomized setup
@@ -135,7 +135,7 @@ fun Randomizer(viewModel: RandomizerViewModel = viewModel()) {
 
     Spirits(viewModel.spirits)
 
-    MapView(viewModel.map.first, viewModel.map.second, viewModel.setup)
+    MapView(viewModel.map, viewModel.setup)
 
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -212,17 +212,16 @@ fun ExpansionSelector(expansions: List<Expansion>, onChange: (List<Expansion>) -
 @Preview
 @Composable
 fun MapPreview() {
-  MapView(listOf(Map.A, Map.B), Orientation.Up, IslandLayout.Flipped)
+  MapView(listOf(Map.A, Map.B), IslandLayout.Flipped)
 }
 
 /**
  * A view of the maps and orientation
  * @param maps list of maps that will be displayed
- * @param orientation orientation that the maps will be displayed
  * @param setup setup of the boards
  */
 @Composable
-fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
+fun MapView(maps: List<Map>, setup: IslandLayout) {
   Column(
     verticalArrangement = Arrangement.Top,
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -287,8 +286,7 @@ fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
             Box(
               modifier = Modifier
                 .width(100.dp)
-                .height(50.dp)
-                .rotate(orientation.degree(i)),
+                .height(50.dp),
               contentAlignment = Alignment.Center
             ) {
               Image(painterResource(map.drawable), "")
@@ -502,19 +500,35 @@ fun randomSpirits(num: Int, onlyLowComplexity: Boolean, expansions: List<Expansi
 
 /**
  * Samples a random number of maps
+ * This will not return map B and E or F and D if possible according to the rules.
+ *
  * @param num number of maps that will be returned
- * @return list of [MapView] and [Orientation]
+ * @return list of [Map]
  */
-fun randomMap(num: Int): Pair<MutableList<Map>, Orientation> {
+fun randomMap(num: Int): MutableList<Map> {
   val allMaps = mutableListOf(Map.A, Map.B, Map.C, Map.D, Map.E, Map.F)
-  val allOrientations = mutableListOf(Orientation.Down, Orientation.Up)
+  val standardMaps = mutableListOf(Map.A, Map.B, Map.C, Map.D)
 
-  var selection: MutableList<Map>
-  do {
+  if (num == 6) {
+    return allMaps
+  }
+  if (num == 5) {
     allMaps.shuffle()
-    selection = allMaps.subList(0, num)
-  } while (num == 2 && selection.containsAll(listOf(Map.E, Map.B)) || selection.containsAll(listOf(Map.F, Map.D)))
+    val selection: MutableList<Map> = allMaps.subList(0, num)
+    return selection
+  }
 
-  allOrientations.shuffle()
-  return selection to allOrientations[0]
+  standardMaps.shuffle()
+  val selection = standardMaps.subList(0, num)
+  if (selection.contains(Map.B)) {
+    if (Math.random() < .5) {
+      selection[selection.indexOf(Map.B)] = Map.E
+    }
+  }
+  if (selection.contains(Map.D)) {
+    if (Math.random() < .5) {
+      selection[selection.indexOf(Map.D)] = Map.F
+    }
+  }
+  return selection
 }
