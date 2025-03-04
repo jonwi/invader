@@ -3,13 +3,11 @@ package com.example.invader
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -99,7 +97,7 @@ class RandomizerViewModel : ViewModel() {
   fun randomize() {
     spirits = randomSpirits(num, easyOnly, expansions)
     map = randomMap(num)
-    setup = IslandLayout.entries.stream().filter{l -> l.players == num}.collect(Collectors.toList()).random()
+    setup = IslandLayout.entries.stream().filter { l -> l.players == num }.collect(Collectors.toList()).random()
   }
 
   /**
@@ -244,7 +242,7 @@ fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
       }
 
       3 -> {
-        when(setup){
+        when (setup) {
           IslandLayout.Sunrise -> ThreePlayerSunrise(maps)
           IslandLayout.Coastline -> ThreePlayerCostline(maps)
           else -> ThreePlayerStandard(maps)
@@ -252,10 +250,29 @@ fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
       }
 
       4 -> {
-        when(setup){
+        when (setup) {
           IslandLayout.Leaf -> FourPlayerMapLeaf(maps)
           IslandLayout.Snake -> FourPlayerMapSnake(maps)
           else -> FourPlayerMapStandard(maps)
+        }
+      }
+
+      5 -> {
+        when (setup) {
+          IslandLayout.Claw -> FivePlayerMapClaw(maps)
+          IslandLayout.Peninsula -> FivePlayerMapPeninsula(maps)
+          IslandLayout.Snail -> FivePlayerMapSnail(maps)
+          IslandLayout.V -> FivePlayerMapV(maps)
+          else -> FivePlayerMapCrab(maps)
+        }
+      }
+
+      6 -> {
+        when (setup) {
+          IslandLayout.Caldera -> SixPlayerMapCaldera(maps)
+          IslandLayout.Flower -> SixPlayerMapFlower(maps)
+          IslandLayout.Star -> SixPlayerMapStar(maps)
+          else -> SixPlayerMapTwoCenters(maps)
         }
       }
 
@@ -288,433 +305,6 @@ fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
 
     }
   }
-}
-
-/**
- * Container for two maps. It will have a fixed size.
- */
-@Composable
-fun TwoPlayerMapContainer(content: @Composable (BoxScope.() -> Unit)) {
-  Box(
-    modifier = Modifier
-      .width(352.dp)
-      .height(300.dp),
-    contentAlignment = Alignment.Center,
-    content = content
-  )
-}
-
-/**
- * General view of two maps that can be arranged by parameters.
- * @param first first map
- * @param second second map
- * @param firstModifier modifier for the first map. changes how it will be placed
- * @param secondModifier modifier for the second map. changes how it will be placed
- */
-@Composable
-fun TwoPlayerMap(first: Map, second: Map, firstModifier: Modifier, secondModifier: Modifier) {
-  TwoPlayerMapContainer {
-    Box(
-      modifier = Modifier.fillMaxSize(),
-      contentAlignment = Alignment.Center
-    ) {
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = firstModifier
-      ) {
-        Image(painterResource(first.drawable), "")
-        Text(
-          first.name,
-          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
-          fontSize = 50.sp,
-          color = MaterialTheme.colorScheme.primary
-        )
-      }
-      Box(
-        contentAlignment = Alignment.Center,
-        modifier = secondModifier
-      ) {
-        Image(painterResource(second.drawable), "")
-        Text(
-          second.name,
-          style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
-          fontSize = 50.sp,
-          color = MaterialTheme.colorScheme.primary
-        )
-      }
-    }
-  }
-}
-
-/**
- * Preview of [TwoPlayerMapStandard]
- */
-@Preview
-@Composable
-fun TwoPlayerMapStandardPreview() {
-  TwoPlayerMapStandard(listOf(Map.A, Map.B))
-}
-
-/**
- * A view of the standard two player setup for the island
- * @param maps list of two maps
- */
-@Composable
-fun TwoPlayerMapStandard(maps: List<Map>) {
-  TwoPlayerMap(
-    maps[0], maps[1],
-    Modifier
-      .width(250.dp)
-      .offset(x = (37).dp, y = (-64).dp),
-    Modifier
-      .width(250.dp)
-      .offset(x = (-38).dp, y = (65).dp)
-      .rotate(180F)
-  )
-}
-
-/**
- * Preview of [TwoPlayerMapFlipped]
- */
-@Preview
-@Composable
-fun TwoPlayerMapFlippedPreview() {
-  TwoPlayerMapFlipped(listOf(Map.A, Map.B))
-}
-
-/**
- * A view of the flipped standard player setup for the island
- * @param maps list of two maps
- */
-@Composable
-fun TwoPlayerMapFlipped(maps: List<Map>) {
-  TwoPlayerMap(
-    maps[0], maps[1],
-    Modifier
-      .width(250.dp)
-      .offset(x = (39).dp, y = (-67).dp)
-      .rotate(180F),
-    Modifier
-      .width(250.dp)
-      .offset(x = (-39).dp, y = (67).dp)
-  )
-}
-
-/**
- * Preview of [TwoPlayerMapOpposing]
- */
-@Preview
-@Composable
-fun TwoPlayerMapOpposingPreview() {
-  TwoPlayerMapOpposing(listOf(Map.A, Map.B))
-}
-
-/**
- * A view of two maps with opposing oceans
- * @param maps list of two maps
- */
-@Composable
-fun TwoPlayerMapOpposing(maps: List<Map>) {
-  TwoPlayerMap(
-    maps[0], maps[1],
-    Modifier
-      .width(220.dp)
-      .offset(x = (-68).dp),
-    Modifier
-      .width(220.dp)
-      .offset(x = 67.dp, y = (-1).dp)
-      .rotate(180F)
-  )
-}
-
-/**
- * preview of [TwoPlayerMapFragment]
- */
-@Preview
-@Composable
-fun TwoPlayerMapFragmentPreview() {
-  TwoPlayerMapFragment(listOf(Map.A, Map.B))
-}
-
-/**
- * A view of the fragment setup as per the jagged earth rules
- * @param maps list of two maps
- */
-@Composable
-fun TwoPlayerMapFragment(maps: List<Map>) {
-  TwoPlayerMap(
-    maps[0], maps[1],
-    Modifier
-      .width(250.dp)
-      .height(250.dp)
-      .offset(x = (-65).dp, y = -(30.dp))
-      .rotate(-90F),
-    Modifier
-      .width(250.dp)
-      .offset(y = (-31).dp, x = (66).dp)
-      .rotate(150F)
-  )
-}
-
-@Preview
-@Composable
-fun SingleMapPreview() {
-  SingleMap(Map.A, Modifier.width(100.dp))
-}
-
-@Composable
-fun SingleMap(map: Map, modifier: Modifier) {
-  Box(
-    contentAlignment = Alignment.Center,
-    modifier = modifier
-  ) {
-    Image(painterResource(map.drawable), "")
-    Text(
-      map.name,
-      style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
-      fontSize = 50.sp,
-      color = MaterialTheme.colorScheme.primary
-    )
-  }
-}
-
-@Composable
-fun ThreePlayerMap(
-  map1: Map,
-  map2: Map,
-  map3: Map,
-  modifier1: Modifier,
-  modifier2: Modifier,
-  modifier3: Modifier
-) {
-  Box(
-    modifier = Modifier.size(242.dp, 300.dp)
-  ) {
-    SingleMap(map1, modifier1)
-    SingleMap(map2, modifier2)
-    SingleMap(map3, modifier3)
-  }
-}
-
-@Preview
-@Composable
-fun ThreePlayerStandardPreview() {
-  ThreePlayerStandard(listOf(Map.A, Map.B, Map.C))
-}
-
-/**
- * Map of three player standard
- * @param maps List of three maps
- */
-@Composable
-fun ThreePlayerStandard(maps: List<Map>) {
-  ThreePlayerMap(
-    maps[0], maps[1], maps[2],
-    Modifier.width(175.dp),
-    Modifier
-      .width(175.dp)
-      .offset(y = 91.dp, x = 1.dp)
-      .rotate(240f),
-    Modifier
-      .width(175.dp)
-      .offset(y = (45).dp, x = 79.dp)
-      .rotate(120f)
-  )
-}
-
-/**
- * Preview of [ThreePlayerCostline]
- */
-@Preview
-@Composable
-fun ThreePlayerCoastlinePreview() {
-  ThreePlayerCostline(listOf(Map.A, Map.B, Map.C))
-}
-
-/**
- * Map of three player costline
- * @param maps list of three maps
- */
-@Composable
-fun ThreePlayerCostline(maps: List<Map>) {
-  ThreePlayerMap(
-    maps[0], maps[1], maps[2],
-    Modifier
-      .width(150.dp)
-      .offset(y = 1.dp, x = 95.dp),
-    Modifier
-      .width(150.dp)
-      .offset(y = 78.dp, x = 49.dp),
-    Modifier
-      .width(150.dp)
-      .offset(y = 156.dp, x = 3.dp),
-  )
-}
-
-
-/**
- * Preview of [ThreePlayerSunrise]
- */
-@Preview
-@Composable
-fun ThreePlayerSunrisePreview() {
-  ThreePlayerSunrise(listOf(Map.A, Map.B, Map.C))
-}
-
-/**
- * Map of three player sunrise
- * @param maps list of three maps
- */
-@Composable
-fun ThreePlayerSunrise(maps: List<Map>) {
-  ThreePlayerMap(
-    maps[0], maps[1], maps[2],
-    Modifier
-      .width(150.dp)
-      .offset(y = 15.dp)
-      .rotate(152f),
-    Modifier
-      .width(150.dp)
-      .offset(y = 81.dp, x = 38.dp)
-      .rotate(210f),
-    Modifier
-      .width(150.dp)
-      .offset(y = 150.dp, x = (-1).dp)
-      .rotate(270f),
-  )
-}
-
-/**
- * View with four maps modifiers are applied to the maps for positioning
- */
-@Composable
-fun FourPlayerMap(
-  map1: Map,
-  map2: Map,
-  map3: Map,
-  map4: Map,
-  modifier1: Modifier,
-  modifier2: Modifier,
-  modifier3: Modifier,
-  modifier4: Modifier,
-) {
-  Box(
-    modifier = Modifier.size(242.dp, 300.dp)
-  ) {
-    SingleMap(map1, modifier1)
-    SingleMap(map2, modifier2)
-    SingleMap(map3, modifier3)
-    SingleMap(map4, modifier4)
-  }
-}
-
-/**
- * Preview for [FourPlayerMapStandard]
- */
-@Preview
-@Composable
-fun FourPlayerMapStandardPreview() {
-  FourPlayerMapStandard(
-    listOf(Map.A, Map.B, Map.C, Map.D)
-  )
-}
-
-/**
- * Four Player map with standard layout
- */
-@Composable
-fun FourPlayerMapStandard(maps: List<Map>) {
-  FourPlayerMap(
-    maps[0], maps[1], maps[2], maps[3],
-    Modifier
-      .width(120.dp)
-      .offset(x = 46.dp),
-    Modifier
-      .width(120.dp)
-      .offset(y = (-1).dp, x = 120.dp)
-      .rotate(180f),
-    Modifier
-      .width(120.dp)
-      .offset(x = 9.dp, y = 62.dp),
-    Modifier
-      .width(120.dp)
-      .offset(y = 61.dp, x = 83.dp)
-      .rotate(180f),
-  )
-}
-
-/**
- * Preview for [FourPlayerMapLeaf]
- */
-@Preview
-@Composable
-fun FourPlayerMapLeafPreview() {
-  FourPlayerMapLeaf(
-    listOf(Map.A, Map.B, Map.C, Map.D)
-  )
-}
-
-/**
- * Four Player map with leaf layout
- */
-@Composable
-fun FourPlayerMapLeaf(maps: List<Map>) {
-  FourPlayerMap(
-    maps[0], maps[1], maps[2], maps[3],
-    Modifier
-      .width(150.dp)
-      .offset(x = 21.dp, y = 25.dp)
-      .rotate(120f),
-    Modifier
-      .width(150.dp)
-      .offset(y = 65.dp, x = 90.dp)
-      .rotate(180f),
-    Modifier
-      .width(150.dp)
-      .offset(x = (-23).dp, y = 105.dp)
-      .rotate(300f),
-    Modifier
-      .width(150.dp)
-      .offset(y = 144.dp, x = 44.dp)
-      .rotate(180f),
-  )
-}
-
-/**
- * Preview for [FourPlayerMapSnake]
- */
-@Preview
-@Composable
-fun FourPlayerMapSnakePreview() {
-  FourPlayerMapSnake(
-    listOf(Map.A, Map.B, Map.C, Map.D)
-  )
-}
-
-/**
- * Four Player map with snake layout
- */
-@Composable
-fun FourPlayerMapSnake(maps: List<Map>) {
-  FourPlayerMap(
-    maps[0], maps[1], maps[2], maps[3],
-    Modifier
-      .width(100.dp)
-      .offset(x = 2.dp, y = 125.dp)
-      .rotate(180f),
-    Modifier
-      .width(100.dp)
-      .offset(x = 32.dp, y = 75.dp)
-      .rotate(0f),
-    Modifier
-      .width(100.dp)
-      .offset(x = 93.dp, y = 74.dp)
-      .rotate(180f),
-    Modifier
-      .width(100.dp)
-      .offset(x = 124.dp, y = 22.dp)
-      .rotate(180f),
-  )
 }
 
 /**
