@@ -30,9 +30,10 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,9 +50,73 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.stream.Collectors
 import kotlin.math.max
 import kotlin.math.min
+
+
+/**
+ * View Model of Randomize View
+ */
+class RandomizerViewModel : ViewModel() {
+
+  /**
+   * randomized list of maps and their orientation
+   */
+  var map by mutableStateOf(emptyList<Map>() to Orientation.Up)
+
+  /**
+   * randomized setup
+   */
+  var setup by mutableStateOf(IslandLayout.StandardTwoPlayers)
+
+  /**
+   * List of randomized spirits
+   */
+  var spirits by mutableStateOf(emptyList<Spirit>())
+
+  /**
+   * Amount of spirits that are used
+   */
+  var num by mutableIntStateOf(2)
+
+  /**
+   * If only low complexity spirits will be used
+   */
+  var easyOnly by mutableStateOf(false)
+
+  /**
+   * List of active expansions for randomization
+   */
+  var expansions by mutableStateOf(listOf(Expansion.Base, Expansion.BranchAndClaw, Expansion.JaggedEarth, Expansion.FeatherAndFlame))
+
+
+  /**
+   * Randomizes spirits map and setup
+   */
+  fun randomize() {
+    spirits = randomSpirits(num, easyOnly, expansions)
+    map = randomMap(num)
+    setup = IslandLayout.entries.stream().filter{l -> l.players == num}.collect(Collectors.toList()).random()
+  }
+
+  /**
+   * Inceases the number of players by one up to a maximum of 6
+   */
+  fun increaseNum() {
+    num = min(num + 1, 6)
+  }
+
+  /**
+   * Decreases the number of players by one to a minimum of 1
+   */
+  fun decreaseNum() {
+    num = max(1, num - 1)
+  }
+
+}
 
 /**
  * A Composable where users can randomize spirits and the board setup.
@@ -60,18 +125,7 @@ import kotlin.math.min
   device = "spec:width=411dp,height=700dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
 )
 @Composable
-fun Randomizer() {
-  val map = remember { mutableStateOf(emptyList<Map>() to Orientation.Up) }
-  val spirits = remember { mutableStateOf(emptyList<Spirit>()) }
-  val num = remember { mutableIntStateOf(2) }
-  val easyOnly = remember { mutableStateOf(false) }
-  val expansions = remember { mutableStateOf(listOf(Expansion.Base, Expansion.BranchAndClaw, Expansion.JaggedEarth, Expansion.FeatherAndFlame)) }
-
-  val handleRandomizer: () -> Unit = {
-    spirits.value = randomSpirits(num.intValue, easyOnly.value, expansions.value)
-    map.value = randomMap(num.intValue)
-  }
-
+fun Randomizer(viewModel: RandomizerViewModel = viewModel()) {
 
   Row(
     horizontalArrangement = Arrangement.SpaceBetween,
@@ -80,27 +134,34 @@ fun Randomizer() {
       .fillMaxSize()
       .padding(end = 20.dp)
   ) {
-    Spirits(spirits.value)
-    MapView(map.value.first, map.value.second)
+
+    Spirits(viewModel.spirits)
+
+    MapView(viewModel.map.first, viewModel.map.second, viewModel.setup)
+
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       modifier = Modifier.width(200.dp)
     ) {
-      ExpansionSelector(expansions.value) { ex -> expansions.value = ex }
+
+      ExpansionSelector(viewModel.expansions) { ex -> viewModel.expansions = ex }
+
       Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(checked = easyOnly.value, onCheckedChange = { easyOnly.value = !easyOnly.value })
+        Checkbox(checked = viewModel.easyOnly, onCheckedChange = { viewModel.easyOnly = !viewModel.easyOnly })
         Text(stringResource(R.string.easy))
       }
+
       Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { num.intValue = max(1, num.intValue - 1) }) {
+        IconButton(onClick = { viewModel.decreaseNum() }) {
           Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
         }
-        Text(text = "${num.intValue}")
-        IconButton(onClick = { num.intValue = min(num.intValue + 1, 4) }) {
+        Text(text = "${viewModel.num}")
+        IconButton(onClick = { viewModel.increaseNum() }) {
           Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
         }
       }
-      Button(onClick = handleRandomizer) {
+
+      Button(onClick = { viewModel.randomize() }) {
         Text(stringResource(R.string.randomize))
       }
     }
@@ -153,47 +214,78 @@ fun ExpansionSelector(expansions: List<Expansion>, onChange: (List<Expansion>) -
 @Preview
 @Composable
 fun MapPreview() {
-  MapView(listOf(Map.A, Map.B), Orientation.Up)
+  MapView(listOf(Map.A, Map.B), Orientation.Up, IslandLayout.Flipped)
 }
 
 /**
  * A view of the maps and orientation
  * @param maps list of maps that will be displayed
  * @param orientation orientation that the maps will be displayed
+ * @param setup setup of the boards
  */
 @Composable
-fun MapView(maps: List<Map>, orientation: Orientation) {
-  if (maps.size == 2) {
-    when (BoardSetupTwoPlayer.entries.random()) {
-      BoardSetupTwoPlayer.Flipped -> TwoPlayerMapFlipped(maps)
-      BoardSetupTwoPlayer.Opposing -> TwoPlayerMapOpposing(maps)
-      BoardSetupTwoPlayer.Fragment -> TwoPlayerMapFragment(maps)
-      BoardSetupTwoPlayer.Standard -> TwoPlayerMapStandard(maps)
+fun MapView(maps: List<Map>, orientation: Orientation, setup: IslandLayout) {
+  Column(
+    verticalArrangement = Arrangement.Top,
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    if (maps.isNotEmpty()) {
+      Text(stringResource(setup.desc))
     }
-  } else {
-    LazyHorizontalGrid(
-      rows = GridCells.Fixed(2),
-      contentPadding = PaddingValues(10.dp),
-      modifier = Modifier.size(242.dp, 300.dp)
-    )
-    {
-      itemsIndexed(maps) { i, map ->
-        Box(
-          modifier = Modifier
-            .width(100.dp)
-            .height(50.dp)
-            .rotate(orientation.degree(i)),
-          contentAlignment = Alignment.Center
-        ) {
-          Image(painterResource(map.drawable), "")
-          Text(
-            map.name,
-            style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
-            fontSize = 50.sp,
-            color = MaterialTheme.colorScheme.primary
-          )
+
+    when (maps.size) {
+      2 -> {
+        when (setup) {
+          IslandLayout.Flipped -> TwoPlayerMapFlipped(maps)
+          IslandLayout.Opposing -> TwoPlayerMapOpposing(maps)
+          IslandLayout.Fragment -> TwoPlayerMapFragment(maps)
+          else -> TwoPlayerMapStandard(maps)
         }
       }
+
+      3 -> {
+        when(setup){
+          IslandLayout.Sunrise -> ThreePlayerSunrise(maps)
+          IslandLayout.Coastline -> ThreePlayerCostline(maps)
+          else -> ThreePlayerStandard(maps)
+        }
+      }
+
+      4 -> {
+        when(setup){
+          IslandLayout.Leaf -> FourPlayerMapLeaf(maps)
+          IslandLayout.Snake -> FourPlayerMapSnake(maps)
+          else -> FourPlayerMapStandard(maps)
+        }
+      }
+
+      else -> {
+        LazyHorizontalGrid(
+          rows = GridCells.Fixed(2),
+          contentPadding = PaddingValues(10.dp),
+          modifier = Modifier.size(242.dp, 300.dp)
+        )
+        {
+          itemsIndexed(maps) { i, map ->
+            Box(
+              modifier = Modifier
+                .width(100.dp)
+                .height(50.dp)
+                .rotate(orientation.degree(i)),
+              contentAlignment = Alignment.Center
+            ) {
+              Image(painterResource(map.drawable), "")
+              Text(
+                map.name,
+                style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+                fontSize = 50.sp,
+                color = MaterialTheme.colorScheme.primary
+              )
+            }
+          }
+        }
+      }
+
     }
   }
 }
@@ -364,6 +456,267 @@ fun TwoPlayerMapFragment(maps: List<Map>) {
   )
 }
 
+@Preview
+@Composable
+fun SingleMapPreview() {
+  SingleMap(Map.A, Modifier.width(100.dp))
+}
+
+@Composable
+fun SingleMap(map: Map, modifier: Modifier) {
+  Box(
+    contentAlignment = Alignment.Center,
+    modifier = modifier
+  ) {
+    Image(painterResource(map.drawable), "")
+    Text(
+      map.name,
+      style = TextStyle(shadow = Shadow(MaterialTheme.colorScheme.inverseOnSurface, blurRadius = 10f)),
+      fontSize = 50.sp,
+      color = MaterialTheme.colorScheme.primary
+    )
+  }
+}
+
+@Composable
+fun ThreePlayerMap(
+  map1: Map,
+  map2: Map,
+  map3: Map,
+  modifier1: Modifier,
+  modifier2: Modifier,
+  modifier3: Modifier
+) {
+  Box(
+    modifier = Modifier.size(242.dp, 300.dp)
+  ) {
+    SingleMap(map1, modifier1)
+    SingleMap(map2, modifier2)
+    SingleMap(map3, modifier3)
+  }
+}
+
+@Preview
+@Composable
+fun ThreePlayerStandardPreview() {
+  ThreePlayerStandard(listOf(Map.A, Map.B, Map.C))
+}
+
+/**
+ * Map of three player standard
+ * @param maps List of three maps
+ */
+@Composable
+fun ThreePlayerStandard(maps: List<Map>) {
+  ThreePlayerMap(
+    maps[0], maps[1], maps[2],
+    Modifier.width(175.dp),
+    Modifier
+      .width(175.dp)
+      .offset(y = 91.dp, x = 1.dp)
+      .rotate(240f),
+    Modifier
+      .width(175.dp)
+      .offset(y = (45).dp, x = 79.dp)
+      .rotate(120f)
+  )
+}
+
+/**
+ * Preview of [ThreePlayerCostline]
+ */
+@Preview
+@Composable
+fun ThreePlayerCoastlinePreview() {
+  ThreePlayerCostline(listOf(Map.A, Map.B, Map.C))
+}
+
+/**
+ * Map of three player costline
+ * @param maps list of three maps
+ */
+@Composable
+fun ThreePlayerCostline(maps: List<Map>) {
+  ThreePlayerMap(
+    maps[0], maps[1], maps[2],
+    Modifier
+      .width(150.dp)
+      .offset(y = 1.dp, x = 95.dp),
+    Modifier
+      .width(150.dp)
+      .offset(y = 78.dp, x = 49.dp),
+    Modifier
+      .width(150.dp)
+      .offset(y = 156.dp, x = 3.dp),
+  )
+}
+
+
+/**
+ * Preview of [ThreePlayerSunrise]
+ */
+@Preview
+@Composable
+fun ThreePlayerSunrisePreview() {
+  ThreePlayerSunrise(listOf(Map.A, Map.B, Map.C))
+}
+
+/**
+ * Map of three player sunrise
+ * @param maps list of three maps
+ */
+@Composable
+fun ThreePlayerSunrise(maps: List<Map>) {
+  ThreePlayerMap(
+    maps[0], maps[1], maps[2],
+    Modifier
+      .width(150.dp)
+      .offset(y = 15.dp)
+      .rotate(152f),
+    Modifier
+      .width(150.dp)
+      .offset(y = 81.dp, x = 38.dp)
+      .rotate(210f),
+    Modifier
+      .width(150.dp)
+      .offset(y = 150.dp, x = (-1).dp)
+      .rotate(270f),
+  )
+}
+
+/**
+ * View with four maps modifiers are applied to the maps for positioning
+ */
+@Composable
+fun FourPlayerMap(
+  map1: Map,
+  map2: Map,
+  map3: Map,
+  map4: Map,
+  modifier1: Modifier,
+  modifier2: Modifier,
+  modifier3: Modifier,
+  modifier4: Modifier,
+) {
+  Box(
+    modifier = Modifier.size(242.dp, 300.dp)
+  ) {
+    SingleMap(map1, modifier1)
+    SingleMap(map2, modifier2)
+    SingleMap(map3, modifier3)
+    SingleMap(map4, modifier4)
+  }
+}
+
+/**
+ * Preview for [FourPlayerMapStandard]
+ */
+@Preview
+@Composable
+fun FourPlayerMapStandardPreview() {
+  FourPlayerMapStandard(
+    listOf(Map.A, Map.B, Map.C, Map.D)
+  )
+}
+
+/**
+ * Four Player map with standard layout
+ */
+@Composable
+fun FourPlayerMapStandard(maps: List<Map>) {
+  FourPlayerMap(
+    maps[0], maps[1], maps[2], maps[3],
+    Modifier
+      .width(120.dp)
+      .offset(x = 46.dp),
+    Modifier
+      .width(120.dp)
+      .offset(y = (-1).dp, x = 120.dp)
+      .rotate(180f),
+    Modifier
+      .width(120.dp)
+      .offset(x = 9.dp, y = 62.dp),
+    Modifier
+      .width(120.dp)
+      .offset(y = 61.dp, x = 83.dp)
+      .rotate(180f),
+  )
+}
+
+/**
+ * Preview for [FourPlayerMapLeaf]
+ */
+@Preview
+@Composable
+fun FourPlayerMapLeafPreview() {
+  FourPlayerMapLeaf(
+    listOf(Map.A, Map.B, Map.C, Map.D)
+  )
+}
+
+/**
+ * Four Player map with leaf layout
+ */
+@Composable
+fun FourPlayerMapLeaf(maps: List<Map>) {
+  FourPlayerMap(
+    maps[0], maps[1], maps[2], maps[3],
+    Modifier
+      .width(150.dp)
+      .offset(x = 21.dp, y = 25.dp)
+      .rotate(120f),
+    Modifier
+      .width(150.dp)
+      .offset(y = 65.dp, x = 90.dp)
+      .rotate(180f),
+    Modifier
+      .width(150.dp)
+      .offset(x = (-23).dp, y = 105.dp)
+      .rotate(300f),
+    Modifier
+      .width(150.dp)
+      .offset(y = 144.dp, x = 44.dp)
+      .rotate(180f),
+  )
+}
+
+/**
+ * Preview for [FourPlayerMapSnake]
+ */
+@Preview
+@Composable
+fun FourPlayerMapSnakePreview() {
+  FourPlayerMapSnake(
+    listOf(Map.A, Map.B, Map.C, Map.D)
+  )
+}
+
+/**
+ * Four Player map with snake layout
+ */
+@Composable
+fun FourPlayerMapSnake(maps: List<Map>) {
+  FourPlayerMap(
+    maps[0], maps[1], maps[2], maps[3],
+    Modifier
+      .width(100.dp)
+      .offset(x = 2.dp, y = 125.dp)
+      .rotate(180f),
+    Modifier
+      .width(100.dp)
+      .offset(x = 32.dp, y = 75.dp)
+      .rotate(0f),
+    Modifier
+      .width(100.dp)
+      .offset(x = 93.dp, y = 74.dp)
+      .rotate(180f),
+    Modifier
+      .width(100.dp)
+      .offset(x = 124.dp, y = 22.dp)
+      .rotate(180f),
+  )
+}
+
 /**
  * Preview of [Spirits]
  */
@@ -516,13 +869,29 @@ enum class Orientation {
 }
 
 /**
- * Represents a board setup for a two player game
+ * Represents a board setup
+ * @param players number of players that this setup is used for
  */
-enum class BoardSetupTwoPlayer {
-  Standard,
-  Flipped,
-  Opposing,
-  Fragment,
+enum class IslandLayout(val players: Int, val desc: Int) {
+  StandardTwoPlayers(2, R.string.standard),
+  Flipped(2, R.string.flipped),
+  Opposing(2, R.string.opposing),
+  Fragment(2, R.string.fragment),
+  StandardThreePlayers(3, R.string.standard),
+  Coastline(3, R.string.coastline),
+  Sunrise(3, R.string.sunrise),
+  StandardFourPlayers(4, R.string.standard),
+  Leaf(4, R.string.leaf),
+  Snake(4, R.string.snake),
+  Crab(5, R.string.crab),
+  Claw(5, R.string.claw),
+  Peninsula(5, R.string.peninsula),
+  Snail(5, R.string.snail),
+  V(5, R.string.v),
+  TwoCenters(6, R.string.two_centers),
+  Caldera(6, R.string.caldera),
+  Flower(6, R.string.flower),
+  Star(6, R.string.star),
 }
 
 /**

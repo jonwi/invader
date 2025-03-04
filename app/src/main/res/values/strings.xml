@@ -94,4 +94,21 @@
     <string name="featherandflame">Feder und Flamme</string>
     <string name="horizons">Horizons</string>
     <string name="natureincarnate">Natur Erwacht</string>
+    <string name="star">Star</string>
+    <string name="flower">Flower</string>
+    <string name="caldera">Caldera</string>
+    <string name="two_centers">Two Centers</string>
+    <string name="v">V</string>
+    <string name="snail">Snail</string>
+    <string name="peninsula">Peninsula</string>
+    <string name="claw">Claw</string>
+    <string name="crab">Crab</string>
+    <string name="snake">Snake</string>
+    <string name="leaf">Leaf</string>
+    <string name="standard">Standard</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="coastline">Coastline</string>
+    <string name="fragment">Fragment</string>
+    <string name="opposing">Opposing</string>
+    <string name="flipped">Flipped</string>
 </resources>
