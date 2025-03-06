@@ -17,38 +17,48 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.stream.Collectors
 import kotlin.math.max
 import kotlin.math.min
+
+/**
+ * View model for difficulty randomization
+ */
+class DifficultyViewModel : ViewModel() {
+  val initialLow = 1
+  val initialHigh = 12
+  var randomized by mutableStateOf(randomizeSetup(initialLow, initialHigh, usesNation = true, usesScenarios = true))
+}
 
 /**
  * Composable that lets the user randomize the setup of the game by selecting a range of difficulty and of nation and/or scenarios should be used.
  */
 @Composable
 @Preview
-fun Difficulty() {
-  val initialLow = 1
-  val initialHigh = 12
-  val randomized = remember { mutableStateOf(randomizeSetup(initialLow, initialHigh, usesNation = true, usesScenarios = true)) }
+fun Difficulty(viewModel: DifficultyViewModel = viewModel()) {
 
   Row(
     modifier = Modifier
       .padding(30.dp)
       .fillMaxWidth(), horizontalArrangement = Arrangement.End
   ) {
-    Setup(randomized.value)
+    Setup(viewModel.randomized)
     Spacer(modifier = Modifier.width(30.dp))
-    DifficultySelector(initialLow, initialHigh, initNation = true, initScenario = true) { low, high, usesNation, usesScenario ->
-      randomized.value = randomizeSetup(low, high, usesNation, usesScenario)
+    DifficultySelector(viewModel.initialLow, viewModel.initialHigh, initNation = true, initScenario = true) { low, high, usesNation, usesScenario ->
+      viewModel.randomized = randomizeSetup(low, high, usesNation, usesScenario)
     }
   }
 
