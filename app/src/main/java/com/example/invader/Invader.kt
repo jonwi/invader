@@ -8,6 +8,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
@@ -27,9 +28,14 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -45,10 +51,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.DragAndDropEvent
@@ -58,6 +66,7 @@ import androidx.compose.ui.draganddrop.mimeTypes
 import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
@@ -132,11 +141,18 @@ fun Invader(
   russiaHiddenCards: List<Card>,
   russiaRevealed: Boolean,
   russiaOnClick: () -> Unit,
+  fracturedHandler: (Card) -> Unit,
+  discardCards: List<Card>,
 ) {
   val openNationDialog = remember { mutableStateOf(false) }
+  var openFracturedDialog by remember { mutableStateOf(false) }
 
   val openNationDialogFunc = {
     openNationDialog.value = true
+  }
+
+  val openFracturedDialogFunc = {
+    openFracturedDialog = true
   }
 
   val currentView = LocalView.current
@@ -153,6 +169,10 @@ fun Invader(
         resetDeck()
       }, currentConfig = nationConfig
       )
+    }
+
+    openFracturedDialog -> {
+      FracturedDialog(discardCards, fracturedHandler, onDismiss = { openFracturedDialog = false })
     }
   }
   Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxHeight()) {
@@ -174,6 +194,7 @@ fun Invader(
       russiaHiddenCards = russiaHiddenCards,
       russiaRevealed = russiaRevealed,
       russiaOnClick = russiaOnClick,
+      openFracturedDialog = openFracturedDialogFunc,
     )
   }
 }
@@ -205,6 +226,7 @@ fun CardDisplayPreview() {
       listOf(Card.EMPTY),
       false,
       {},
+      {},
     )
   }
 }
@@ -227,6 +249,7 @@ fun CardDisplayPreview() {
  * @param russiaHiddenCards list of cards that are on top of the russia pile
  * @param russiaRevealed True if the top card on the russia pile is revealed
  * @param russiaOnClick handler of the click event of the russia pile
+ * @param openFracturedDialog handler to open the fractured dialog
  */
 @Composable
 fun CardDisplay(
@@ -247,6 +270,7 @@ fun CardDisplay(
   russiaHiddenCards: List<Card>,
   russiaRevealed: Boolean,
   russiaOnClick: () -> Unit,
+  openFracturedDialog: () -> Unit,
 ) {
 
   Column(
@@ -255,7 +279,7 @@ fun CardDisplay(
     Row {
       Discard(cards = discardCard, addCard = addDiscardCard, nationConfig = nationConfig, openNationDialog = openNationDialog)
       Row(
-        horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
+        horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()
       ) {
         if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
         if (nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && (discardCard.isEmpty() || discardCard.last().gen <= 1))
@@ -270,13 +294,44 @@ fun CardDisplay(
           addCard = addBuildingCard
         )
         if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
-        Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
+        Column(
+          horizontalAlignment = Alignment.End
+        ) {
+          Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
+          InvaderDeckFunctions(openFracturedDialog)
+        }
         if (nationConfig.nation == Nation.Russland && nationConfig.level >= 5) {
           RussiaDeck(cards = russiaHiddenCards, onClick = russiaOnClick, revealed = russiaRevealed)
         }
       }
     }
   }
+}
+
+@Composable
+fun InvaderDeckFunctions(fracturedHandler: () -> Unit) {
+  Row(
+  ) {
+    IconButton(
+      onClick = fracturedHandler,
+      modifier = Modifier
+        .size(32.dp)
+        .clip(CircleShape)
+    ) {
+      Image(
+        painter = painterResource(id = R.drawable.fractured),
+        contentDescription = "Fractured Image",
+        modifier = Modifier.size(32.dp),
+        contentScale = ContentScale.Crop
+      )
+    }
+  }
+}
+
+@Composable
+@Preview
+fun InvaderDeckFunctionsPreview() {
+  InvaderDeckFunctions({})
 }
 
 /**
@@ -357,59 +412,105 @@ fun NationDialog(
   val nation = remember { mutableStateOf(currentConfig.nation) }
   val level = remember { mutableIntStateOf(currentConfig.level) }
 
-  AlertDialog(properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f), title = {
-    Text(text = stringResource(R.string.neues_spiel))
-  }, text = {
-    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-      LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 200.dp),
-        modifier = Modifier.weight(1f)
-      ) {
-        items(Nation.entries.toList()) { n ->
-          Button(
-            onClick = { nation.value = n },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == n) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
-          ) {
-            Text(stringResource(n.descId))
+  AlertDialog(properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f),
+    title = {
+      Text(text = stringResource(R.string.neues_spiel))
+    }, text = {
+      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        LazyVerticalGrid(
+          columns = GridCells.Adaptive(minSize = 200.dp),
+          modifier = Modifier.weight(1f)
+        ) {
+          items(Nation.entries.toList()) { n ->
+            Button(
+              onClick = { nation.value = n },
+              modifier = Modifier.fillMaxWidth(),
+              colors = ButtonDefaults.buttonColors(containerColor = if (nation.value == n) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+            ) {
+              Text(stringResource(n.descId))
+            }
+          }
+        }
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+          modifier = Modifier
+            .fillMaxHeight()
+            .width(100.dp)
+        ) {
+          Text("Level")
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { level.intValue = max(1, level.intValue - 1) }) {
+              Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
+            }
+            Text(text = "${level.intValue}")
+            IconButton(onClick = { level.intValue = min(level.intValue + 1, 6) }) {
+              Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
+            }
           }
         }
       }
-      Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-          .fillMaxHeight()
-          .width(100.dp)
-      ) {
-        Text("Level")
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          IconButton(onClick = { level.intValue = max(1, level.intValue - 1) }) {
-            Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, "-1")
-          }
-          Text(text = "${level.intValue}")
-          IconButton(onClick = { level.intValue = min(level.intValue + 1, 6) }) {
-            Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
-          }
-        }
-      }
-    }
 
-  }, onDismissRequest = {
-    onDismissRequest()
-  }, confirmButton = {
-    TextButton(onClick = {
-      onConfirmation(NationConfig(nation.value, level.intValue))
-    }) {
-      Text(stringResource(R.string.confirm))
-    }
-  }, dismissButton = {
-    TextButton(onClick = {
+    }, onDismissRequest = {
       onDismissRequest()
-    }) {
-      Text(stringResource(R.string.abort))
-    }
-  })
+    }, confirmButton = {
+      TextButton(onClick = {
+        onConfirmation(NationConfig(nation.value, level.intValue))
+      }) {
+        Text(stringResource(R.string.confirm))
+      }
+    }, dismissButton = {
+      TextButton(onClick = {
+        onDismissRequest()
+      }) {
+        Text(stringResource(R.string.abort))
+      }
+    })
+}
+
+@Composable
+fun FracturedDialog(cards: List<Card>, fracturedHandler: (Card) -> Unit, onDismiss: () -> Unit) {
+  var selected by remember { mutableIntStateOf(0) }
+  AlertDialog(
+    properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f),
+    title = {
+      Text(text = "Exchange Invader Card")
+    },
+    text = {
+      LazyRow() {
+        itemsIndexed(cards) { index, card ->
+          Box(
+            modifier = Modifier
+              .clickable { selected = index }
+              .then(
+                when {
+                  selected == index -> Modifier.border(3.dp, Color.Red, RoundedCornerShape(1.dp))
+                  else -> Modifier
+                }
+              )
+          ) {
+            DynamicDisplay(card, draggable = false)
+          }
+        }
+      }
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          fracturedHandler(cards[selected])
+          onDismiss()
+        }
+      ) {
+        Text("Confirm")
+      }
+    },
+    dismissButton = {
+      Button(onClick = onDismiss) {
+        Text("Dismiss")
+      }
+    },
+    onDismissRequest = onDismiss,
+  )
 }
 
 /**
@@ -1274,7 +1375,7 @@ fun MountainBackground() {
           waveColor,
           h.toFloat() * 3f / 1.5f,
           amplitude = currentProg.toFloat() / 2,
-          width *2,
+          width * 2,
           phase = h.toFloat(),
           thickness = 10f,
         )
@@ -1327,10 +1428,12 @@ private fun DrawScope.drawTriangleWave(
 @Composable
 fun PreviewTriangleWaveBackground() {
   Box(modifier = Modifier.size(200.dp, 200.dp)) {
-    Box(modifier =
-    Modifier.size(120.dp, 200.dp)
-      .rotate(90f)
-      .offset(y = -40.dp)
+    Box(
+      modifier =
+      Modifier
+        .size(120.dp, 200.dp)
+        .rotate(90f)
+        .offset(y = -40.dp)
     ) {
       MountainBackground()
     }

@@ -160,7 +160,14 @@ class MainActivity : ComponentActivity() {
                   russiaRevealed = russiaRevealed.value,
                   russiaOnClick = {
                     russiaRevealed.value = !russiaRevealed.value
-                  }
+                  },
+                  fracturedHandler = { card ->
+                    discardCards.remove(card)
+                    val first = exploreCards.removeAt(exploreCards.size - 1)
+                    discardCards.add(0, first)
+                    exploreCards.add(card)
+                  },
+                  discardCards = discardCards
                 )
               }
             }
