@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Spirit Island Companion</string>
     <string name="erde">Vital Strength of the Earth</string>
     <string name="schatten">"Shadows Flicker Like Flame "</string>
     <string name="blitz">"Lightning's Swift Strike "</string>
@@ -110,4 +109,8 @@
     <string name="opposing">Opposing</string>
     <string name="flipped">Flipped</string>
     <string name="lowComplexity">low complex spirits</string>
+    <string name="hard_working_settler_description">Remove the bottommost Stage II and Stage III Cards in the Invader Deck from the game.</string>
+    <string name="hard_working_settlers">Hard-Working Settlers</string>
+    <string name="rising_interest_description">Return the top card of the Invader Deck to the box.</string>
+    <string name="rising_interest_in_the_island">Rising Interest in the Island</string>
 </resources>

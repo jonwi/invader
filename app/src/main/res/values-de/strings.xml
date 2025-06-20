@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Spirit Island Companion</string>
     <string name="erde">Lebenskraft der Erde</string>
     <string name="schatten">Flackernde Schatten</string>
     <string name="blitz">Pfeilschneller Blitzschlag</string>
@@ -80,4 +79,8 @@
     <string name="serpent">Unter der Insel Schlummernde Schlange</string>
     <string name="wildfire">Seele des Flächenbrands</string>
     <string name="lowComplexity">einfache Geister</string>
+    <string name="hard_working_settler_description">Entferne die unterste Stufe II und Stufe III Karte aus dem Invasoren Stapel.</string>
+    <string name="hard_working_settlers">Hard arbeitende Siedler</string>
+    <string name="rising_interest_description">Entferne die oberste Karte des Invasoren Stapels.</string>
+    <string name="rising_interest_in_the_island">Erhöhte Aufmerksamkeit für die Insel</string>
 </resources>

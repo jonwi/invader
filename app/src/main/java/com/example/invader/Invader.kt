@@ -32,13 +32,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -120,6 +120,10 @@ import kotlin.math.sqrt
  * @param russiaHiddenCards list of cards that are on top of the russia pile
  * @param russiaRevealed True if the top card on the russia pile is revealed
  * @param russiaOnClick handler of the click event of the russia pile
+ * @param fracturedHandler handler for factured days split the skies
+ * @param hardWorkingSettlersHandler handler for hard working settlers
+ * @param discardCards list of all discard cards
+ * @param risingInterestInTheIslandHandler hanlder for rising interest in the island
  */
 @Composable
 fun Invader(
@@ -143,9 +147,13 @@ fun Invader(
   russiaOnClick: () -> Unit,
   fracturedHandler: (Card) -> Unit,
   discardCards: List<Card>,
+  hardWorkingSettlersHandler: () -> Unit,
+  risingInterestInTheIslandHandler: () -> Unit,
 ) {
   val openNationDialog = remember { mutableStateOf(false) }
   var openFracturedDialog by remember { mutableStateOf(false) }
+  var openHardWorkingSettlersDialog by remember { mutableStateOf(false) }
+  var openRisingInterestInTheIslandDialog by remember { mutableStateOf(false) }
 
   val openNationDialogFunc = {
     openNationDialog.value = true
@@ -174,6 +182,14 @@ fun Invader(
     openFracturedDialog -> {
       FracturedDialog(discardCards, fracturedHandler, onDismiss = { openFracturedDialog = false })
     }
+
+    openHardWorkingSettlersDialog -> {
+      HardWorkingSettlersDialog(onAccept = hardWorkingSettlersHandler, onDismiss = { openHardWorkingSettlersDialog = false })
+    }
+
+    openRisingInterestInTheIslandDialog -> {
+      RisingInterestInTheIslandDialog(onAccept = risingInterestInTheIslandHandler, onDismiss = { openRisingInterestInTheIslandDialog = false })
+    }
   }
   Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxHeight()) {
     CardDisplay(
@@ -195,6 +211,8 @@ fun Invader(
       russiaRevealed = russiaRevealed,
       russiaOnClick = russiaOnClick,
       openFracturedDialog = openFracturedDialogFunc,
+      openHardWorkingSettlersDialog = { openHardWorkingSettlersDialog = true },
+      openRisingInterestInTheIslandDialog = { openRisingInterestInTheIslandDialog = true }
     )
   }
 }
@@ -225,6 +243,8 @@ fun CardDisplayPreview() {
       {},
       listOf(Card.EMPTY),
       false,
+      {},
+      {},
       {},
       {},
     )
@@ -271,6 +291,8 @@ fun CardDisplay(
   russiaRevealed: Boolean,
   russiaOnClick: () -> Unit,
   openFracturedDialog: () -> Unit,
+  openHardWorkingSettlersDialog: () -> Unit,
+  openRisingInterestInTheIslandDialog: () -> Unit,
 ) {
 
   Column(
@@ -298,7 +320,7 @@ fun CardDisplay(
           horizontalAlignment = Alignment.End
         ) {
           Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
-          InvaderDeckFunctions(openFracturedDialog)
+          InvaderDeckFunctions(openFracturedDialog, openHardWorkingSettlersDialog, openRisingInterestInTheIslandDialog)
         }
         if (nationConfig.nation == Nation.Russland && nationConfig.level >= 5) {
           RussiaDeck(cards = russiaHiddenCards, onClick = russiaOnClick, revealed = russiaRevealed)
@@ -308,8 +330,13 @@ fun CardDisplay(
   }
 }
 
+/**
+ * @param fracturedHandler  onClick for fractured
+ * @param openHardWorkingSettlersDialog onClick for hard working settlers
+ * @param openRisingInterestInTheIslandDialog onClick for rising interest in the island dialog
+ */
 @Composable
-fun InvaderDeckFunctions(fracturedHandler: () -> Unit) {
+fun InvaderDeckFunctions(fracturedHandler: () -> Unit, openHardWorkingSettlersDialog: () -> Unit, openRisingInterestInTheIslandDialog: () -> Unit) {
   Row(
   ) {
     IconButton(
@@ -325,13 +352,38 @@ fun InvaderDeckFunctions(fracturedHandler: () -> Unit) {
         contentScale = ContentScale.Crop
       )
     }
+    IconButton(
+      onClick = openHardWorkingSettlersDialog,
+      modifier = Modifier
+        .size(32.dp)
+        .clip(CircleShape)
+    ) {
+      Icon(
+        Icons.Default.Delete,
+        "HardWorkingSettlers"
+      )
+    }
+    IconButton(
+      onClick = openRisingInterestInTheIslandDialog,
+      modifier = Modifier
+        .size(32.dp)
+        .clip(CircleShape)
+    ) {
+      Icon(
+        Icons.Default.Delete,
+        "RisingInterestInTheIsland"
+      )
+    }
   }
 }
 
+/**
+ * Preview for [InvaderDeckFunctions]
+ */
 @Composable
 @Preview
 fun InvaderDeckFunctionsPreview() {
-  InvaderDeckFunctions({})
+  InvaderDeckFunctions({}, {}, {})
 }
 
 /**
@@ -468,6 +520,13 @@ fun NationDialog(
     })
 }
 
+/**
+ * Dialog for Fractured days split the sky
+ *
+ * @param cards list of cards to show
+ * @param fracturedHandler onAccept
+ * @param onDismiss onDismiss
+ */
 @Composable
 fun FracturedDialog(cards: List<Card>, fracturedHandler: (Card) -> Unit, onDismiss: () -> Unit) {
   var selected by remember { mutableIntStateOf(0) }
@@ -507,6 +566,76 @@ fun FracturedDialog(cards: List<Card>, fracturedHandler: (Card) -> Unit, onDismi
     dismissButton = {
       Button(onClick = onDismiss) {
         Text("Dismiss")
+      }
+    },
+    onDismissRequest = onDismiss,
+  )
+}
+
+/**
+ * Dialog for Hard-Working Settlers Card
+ *
+ * @param onAccept onAccept
+ * @param onDismiss onDismiss
+ */
+@Composable
+fun HardWorkingSettlersDialog(onAccept: () -> Unit, onDismiss: () -> Unit) {
+  AlertDialog(
+    properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f),
+    title = {
+      Text(text = stringResource(R.string.hard_working_settlers))
+    },
+    text = {
+      Text(text = stringResource(R.string.hard_working_settler_description))
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          onAccept()
+          onDismiss()
+        }
+      ) {
+        Text(stringResource(R.string.confirm))
+      }
+    },
+    dismissButton = {
+      Button(onClick = onDismiss) {
+        Text(stringResource(R.string.abort))
+      }
+    },
+    onDismissRequest = onDismiss,
+  )
+}
+
+/**
+ * Dialog for Rising Interest in the Island
+ *
+ * @param onAccept onAccept
+ * @param onDismiss onDismiss
+ */
+@Composable
+fun RisingInterestInTheIslandDialog(onAccept: () -> Unit, onDismiss: () -> Unit) {
+  AlertDialog(
+    properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f),
+    title = {
+      Text(text = stringResource(R.string.rising_interest_in_the_island))
+    },
+    text = {
+      Text(text = stringResource(R.string.rising_interest_description))
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          onAccept()
+          onDismiss()
+        }
+      ) {
+        Text(stringResource(R.string.confirm))
+      }
+    },
+    dismissButton = {
+      Button(onClick = onDismiss) {
+        Text(stringResource(R.string.abort))
       }
     },
     onDismissRequest = onDismiss,

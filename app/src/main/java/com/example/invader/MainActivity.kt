@@ -167,7 +167,24 @@ class MainActivity : ComponentActivity() {
                     discardCards.add(0, first)
                     exploreCards.add(card)
                   },
-                  discardCards = discardCards
+                  discardCards = discardCards,
+                  hardWorkingSettlersHandler = {
+                    for (card in exploreCards) {
+                      if (card.gen == 2) {
+                        exploreCards.remove(card)
+                        break
+                      }
+                    }
+                    for (card in exploreCards) {
+                      if (card.gen == 3) {
+                        exploreCards.remove(card)
+                        break
+                      }
+                    }
+                  },
+                  risingInterestInTheIslandHandler = {
+                    exploreCards.removeAt(exploreCards.size - 1)
+                  }
                 )
               }
             }
