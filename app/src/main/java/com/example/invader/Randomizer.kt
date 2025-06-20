@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Shadow
@@ -90,12 +89,17 @@ class RandomizerViewModel : ViewModel() {
    */
   var expansions by mutableStateOf(listOf(Expansion.Base, Expansion.BranchAndClaw, Expansion.JaggedEarth, Expansion.FeatherAndFlame))
 
+  /**
+   * If no low Complexity spitits will be used
+   */
+  var lowComplexity by mutableStateOf(false)
+
 
   /**
    * Randomizes spirits map and setup
    */
   fun randomize() {
-    spirits = randomSpirits(num, easyOnly, expansions)
+    spirits = randomSpirits(num, easyOnly, expansions, lowComplexity)
     map = randomMap(num)
     setup = IslandLayout.entries.stream().filter { l -> l.players == num }.collect(Collectors.toList()).random()
   }
@@ -144,9 +148,16 @@ fun Randomizer(viewModel: RandomizerViewModel = viewModel()) {
 
       ExpansionSelector(viewModel.expansions) { ex -> viewModel.expansions = ex }
 
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(checked = viewModel.easyOnly, onCheckedChange = { viewModel.easyOnly = !viewModel.easyOnly })
-        Text(stringResource(R.string.easy))
+      Column() {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(checked = viewModel.easyOnly, onCheckedChange = { viewModel.easyOnly = !viewModel.easyOnly })
+          Text(stringResource(R.string.easy))
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Checkbox(checked = viewModel.lowComplexity, onCheckedChange = { viewModel.lowComplexity = !viewModel.lowComplexity })
+          Text(stringResource(R.string.lowComplexity))
+        }
       }
 
       Row(verticalAlignment = Alignment.CenterVertically) {
@@ -487,10 +498,14 @@ enum class IslandLayout(val players: Int, val desc: Int) {
  * @param num number of spirits returned
  * @param onlyLowComplexity True if there should only be low complexity spirits returned
  * @param expansions list of expansions that spirits need to be from
+ * @param lowComplexity True if there should be no low complexity spirits
  * @return list of [Spirit] of empty list when there are not enough spirits with the criteria
  */
-fun randomSpirits(num: Int, onlyLowComplexity: Boolean, expansions: List<Expansion>): List<Spirit> {
-  val spirits = Spirit.entries.stream().filter { s -> s.expansion in expansions && (!onlyLowComplexity || s.complexity == Complexity.Low) }.collect(Collectors.toList())
+fun randomSpirits(num: Int, onlyLowComplexity: Boolean, expansions: List<Expansion>, lowComplexity: Boolean): List<Spirit> {
+  val spirits = Spirit.entries.stream()
+    .filter { s -> s.expansion in expansions && (!onlyLowComplexity || s.complexity == Complexity.Low) }
+    .filter { s -> lowComplexity || s.complexity != Complexity.Low }
+    .collect(Collectors.toList())
   spirits.shuffle()
   if (spirits.size < num) {
     return emptyList()
