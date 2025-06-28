@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -649,26 +650,29 @@ fun RisingInterestInTheIslandDialog(onAccept: () -> Unit, onDismiss: () -> Unit)
 @Preview
 @Composable
 fun Splitter(width: Dp = 20.dp, color: Color = Color.Black, onClick: () -> Unit = {}) {
-  Column(
-    modifier = Modifier
-      .height(200.dp)
-      .clickable(onClick = onClick), verticalArrangement = Arrangement.Center
-  ) {
-    Box(modifier = Modifier
-      .drawWithCache {
-        val h = size.height
-        val w = size.width
-        val start = (h - 2 * w) / 2
-        val r = RoundedPolygon(vertices = floatArrayOf(w, 1f * start, 0f, 0.5f * h, w, w + w + start, w, w + w + start - 0.1f * w, 0.11f * w, 0.5f * h, w, start + 0.1f * w))
-        val roundedPolygonPath = r
-          .toPath()
-          .asComposePath()
-        onDrawBehind { drawPath(roundedPolygonPath, color = color) }
-      }
-      .width(width)
-      .height(width * 2)
-    )
-    Text(text = "")
+  Column() {
+    Text("")
+    Column(
+      modifier = Modifier
+        .height(200.dp)
+        .clickable(onClick = onClick), verticalArrangement = Arrangement.Center
+    ) {
+      Box(modifier = Modifier
+        .drawWithCache {
+          val h = size.height
+          val w = size.width
+          val start = (h - 2 * w) / 2
+          val r = RoundedPolygon(vertices = floatArrayOf(w, 1f * start, 0f, 0.5f * h, w, w + w + start, w, w + w + start - 0.1f * w, 0.11f * w, 0.5f * h, w, start + 0.1f * w))
+          val roundedPolygonPath = r
+            .toPath()
+            .asComposePath()
+          onDrawBehind { drawPath(roundedPolygonPath, color = color) }
+        }
+        .width(width)
+        .height(width * 2)
+      )
+      Text(text = "")
+    }
   }
 }
 
