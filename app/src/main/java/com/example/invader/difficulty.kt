@@ -248,6 +248,7 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.England, 0),
       NationConfig(Nation.Schottland, 0),
       NationConfig(Nation.Russland, 0),
+      NationConfig(Nation.HabsburgMining, 0),
     ).map { c -> Pair(c, 1) }.toList()
 
     2 -> return listOf(
@@ -263,7 +264,8 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.France, 1),
       NationConfig(Nation.Schottland, 1),
       NationConfig(Nation.Russland, 1),
-      NationConfig(Nation.Habsburg, 1)
+      NationConfig(Nation.Habsburg, 1),
+      NationConfig(Nation.HabsburgMining, 1),
     ).map { c -> Pair(c, 3) }.toList()
 
     4 -> return listOf(
@@ -271,12 +273,14 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.England, 2),
       NationConfig(Nation.Schottland, 2),
       NationConfig(Nation.Russland, 2),
+      NationConfig(Nation.HabsburgMining, 2),
     ).map { c -> Pair(c, 4) }.toList()
 
     5 -> return listOf(
       NationConfig(Nation.Schweden, 3),
       NationConfig(Nation.France, 2),
       NationConfig(Nation.Habsburg, 2),
+      NationConfig(Nation.HabsburgMining, 3),
     ).map { c -> Pair(c, 5) }.toList()
 
     6 -> return listOf(
@@ -295,6 +299,7 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.France, 3),
       NationConfig(Nation.Schottland, 4),
       NationConfig(Nation.Russland, 4),
+      NationConfig(Nation.HabsburgMining, 4),
     ).map { c -> Pair(c, 7) }.toList()
 
     8 -> return listOf(
@@ -310,6 +315,7 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.France, 5),
       NationConfig(Nation.Russland, 5),
       NationConfig(Nation.Habsburg, 5),
+      NationConfig(Nation.HabsburgMining, 5),
     ).map { c -> Pair(c, 9) }.toList()
 
     10 -> return listOf(
@@ -317,6 +323,7 @@ private fun nationByDifficulty(difficulty: Int): List<Pair<NationConfig, Int>> {
       NationConfig(Nation.France, 6),
       NationConfig(Nation.Schottland, 6),
       NationConfig(Nation.Habsburg, 6),
+      NationConfig(Nation.HabsburgMining, 6),
     ).map { c -> Pair(c, 10) }.toList()
 
     11 -> return listOf(

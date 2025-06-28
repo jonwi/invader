@@ -85,6 +85,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -923,7 +924,20 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
       Card.MOUNTAIN_SWAMP -> MountainSwamp()
       Card.SWAMP_JUNGLE -> SwampJungle()
       Card.HABSBURG -> Habsburg()
+      Card.HABSBURG_MINING -> HabsburgMining()
     }
+  }
+}
+
+/**
+ *
+ * @param gen generation of the swamp
+ * @param nation True if this has the escalation effect on it
+ */
+@Preview
+@Composable
+fun HabsburgMining(gen: Int = 2, nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.MINING.color, text = stringResource(R.string.salzvorkommen), generation = gen, nation = nation) {
   }
 }
 
@@ -1209,7 +1223,7 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, natio
         ) {
           if (generation != null) Text(text = if (generation == 1) "I" else "II", fontWeight = FontWeight.Bold)
         }
-        Text(text, fontWeight = FontWeight.Bold)
+        Text(text, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         if (nation) Box(modifier = Modifier.height(50.dp), contentAlignment = Alignment.Center) {
           Image(
             painter = painterResource(id = R.drawable.nation),
@@ -1244,6 +1258,7 @@ enum class CardColor(val color: Color) {
   DESERT(Color(255, 197, 81, 255)),
   JUNGLE(Color(14, 81, 7)),
   FINISH(Color(250, 250, 250)),
+  MINING(Color(200, 200, 200))
 }
 
 /**
@@ -1253,7 +1268,7 @@ enum class Card(val gen: Int) {
   SWAMP(1), JUNGLE(1), MOUNTAIN(1), DESERT(1), COAST(2), SWAMP_NATION(2), JUNGLE_NATION(2), MOUNTAIN_NATION(2), DESERT_NATION(2), MOUNTAIN_DESERT(3), SWAMP_JUNGLE(3), DESERT_JUNGLE(3), MOUNTAIN_JUNGLE(
     3
   ),
-  DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0), HABSBURG(0),
+  DESERT_SWAMP(3), MOUNTAIN_SWAMP(3), FINISH(0), EMPTY(0), HABSBURG(0), HABSBURG_MINING(0)
 }
 
 /**
@@ -1267,7 +1282,8 @@ enum class Nation(val descId: Int, val flag: Int) {
   Russland(R.string.russland, R.drawable.russia_wrinkledflag),
   France(R.string.france, R.drawable.france_wrinkledflag),
   Habsburg(R.string.habsburg, R.drawable.habsburg_monarchy__wrinkledflag),
-  Schottland(R.string.schottland, R.drawable.scotland_wrinkledflag)
+  Schottland(R.string.schottland, R.drawable.scotland_wrinkledflag),
+  HabsburgMining(R.string.habsburg_mining, R.drawable.habsburg_mining_expedition_flag)
 }
 
 /**
@@ -1338,6 +1354,21 @@ class Deck(nationConfig: NationConfig) {
         if (nationConfig.level >= 5) {
           deck.add(4, Card.HABSBURG)
         }
+      }
+
+      nationConfig.nation == Nation.HabsburgMining && nationConfig.level >= 4 -> {
+        secondColors.replaceAll { c ->
+          if (c == Card.COAST) {
+            return@replaceAll secondRemoved
+          } else {
+            return@replaceAll c
+          }
+        }
+        secondColors[1] = Card.HABSBURG_MINING
+
+        deck.addAll(firstColors)
+        deck.addAll(secondColors)
+        deck.addAll(thirdColors)
       }
 
       else -> {

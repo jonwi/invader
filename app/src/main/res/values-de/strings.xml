@@ -83,4 +83,6 @@
     <string name="hard_working_settlers">Hard arbeitende Siedler</string>
     <string name="rising_interest_description">Entferne die oberste Karte des Invasoren Stapels.</string>
     <string name="rising_interest_in_the_island">Erhöhte Aufmerksamkeit für die Insel</string>
+    <string name="habsburg_mining">Habsburger Bergbaugesellschaft</string>
+    <string name="salzvorkommen">Salz\u200Bvorkommen</string>
 </resources>
