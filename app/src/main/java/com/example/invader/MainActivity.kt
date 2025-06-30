@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
           val russiaRevealed = remember { mutableStateOf(false) }
 
           val activity = LocalContext.current as Activity
-          activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+          activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
 
           val exploreClick: () -> Unit = {
             if (!revealed.value) {
