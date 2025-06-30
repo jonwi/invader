@@ -143,7 +143,7 @@ fun Randomizer(viewModel: RandomizerViewModel = viewModel()) {
 
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.width(200.dp)
+      modifier = Modifier.width(210.dp)
     ) {
 
       ExpansionSelector(viewModel.expansions) { ex -> viewModel.expansions = ex }
@@ -168,11 +168,11 @@ fun Randomizer(viewModel: RandomizerViewModel = viewModel()) {
         IconButton(onClick = { viewModel.increaseNum() }) {
           Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, "+1")
         }
+        Button(onClick = { viewModel.randomize() }) {
+          Text(stringResource(R.string.randomize))
+        }
       }
 
-      Button(onClick = { viewModel.randomize() }) {
-        Text(stringResource(R.string.randomize))
-      }
     }
   }
 }
