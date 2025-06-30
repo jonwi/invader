@@ -87,7 +87,7 @@ class RandomizerViewModel : ViewModel() {
   /**
    * List of active expansions for randomization
    */
-  var expansions by mutableStateOf(listOf(Expansion.Base, Expansion.BranchAndClaw, Expansion.JaggedEarth, Expansion.FeatherAndFlame))
+  var expansions by mutableStateOf(listOf(Expansion.Base, Expansion.BranchAndClaw, Expansion.JaggedEarth, Expansion.FeatherAndFlame, Expansion.NatureIncarnate))
 
   /**
    * If no low Complexity spitits will be used
