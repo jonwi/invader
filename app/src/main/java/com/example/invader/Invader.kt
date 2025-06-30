@@ -16,7 +16,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -793,15 +792,9 @@ fun Explore(cards: List<Card>, onClick: () -> Unit, revealed: Boolean, addCard: 
       Text(text = stringResource(R.string.cards) + cards.size.toString())
       Box(modifier = Modifier.clickable(onClick = onClick)) {
         DynamicDisplay(Card.FINISH, draggable = false)
-        if (revealed) {
-          Box {
-            for (card in cards) {
-              DynamicDisplay(card = card)
-            }
-          }
-        } else {
-          if (cards.isNotEmpty()) {
-            DynamicDisplay(Card.EMPTY, cards.last().gen, false)
+        Box {
+          for (card in cards) {
+            DynamicDisplay(card = card, revealed = revealed, gen = card.gen)
           }
         }
       }
@@ -888,10 +881,11 @@ fun Discard(cards: List<Card>, addCard: (Card) -> Unit, nationConfig: NationConf
  * @param card card to be displayed
  * @param gen invader generation if there is any
  * @param draggable if the card is draggable
+ * @param revealed if the card is revealed
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
+fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true, revealed: Boolean = true) {
   Box(
     modifier = Modifier
       .then(if (draggable)
@@ -909,39 +903,41 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true) {
       .requiredHeight(200.dp)
       .requiredWidth(120.dp)
   ) {
-    when (card) {
-      Card.EMPTY -> Empty(gen)
-      Card.SWAMP -> Swamp(1)
-      Card.DESERT -> Desert(1)
-      Card.JUNGLE -> Jungle(1)
-      Card.MOUNTAIN -> Mountain(1)
-      Card.COAST -> Coast(2)
-      Card.SWAMP_NATION -> Swamp(2, nation = true)
-      Card.MOUNTAIN_NATION -> Mountain(2, nation = true)
-      Card.DESERT_NATION -> Desert(2, nation = true)
-      Card.JUNGLE_NATION -> Jungle(2, nation = true)
-      Card.FINISH -> Finish()
-      Card.DESERT_JUNGLE -> DesertJungle()
-      Card.DESERT_SWAMP -> DesertSwamp()
-      Card.MOUNTAIN_DESERT -> MountainDesert()
-      Card.MOUNTAIN_JUNGLE -> MountainJungle()
-      Card.MOUNTAIN_SWAMP -> MountainSwamp()
-      Card.SWAMP_JUNGLE -> SwampJungle()
-      Card.HABSBURG -> Habsburg()
-      Card.HABSBURG_MINING -> HabsburgMining()
+    if (!revealed) {
+      Empty(card, gen)
+    } else {
+      when (card) {
+        Card.EMPTY -> Empty(card, gen)
+        Card.SWAMP -> Swamp(1)
+        Card.DESERT -> Desert(1)
+        Card.JUNGLE -> Jungle(1)
+        Card.MOUNTAIN -> Mountain(1)
+        Card.COAST -> Coast(2)
+        Card.SWAMP_NATION -> Swamp(2, nation = true)
+        Card.MOUNTAIN_NATION -> Mountain(2, nation = true)
+        Card.DESERT_NATION -> Desert(2, nation = true)
+        Card.JUNGLE_NATION -> Jungle(2, nation = true)
+        Card.FINISH -> Finish()
+        Card.DESERT_JUNGLE -> DesertJungle()
+        Card.DESERT_SWAMP -> DesertSwamp()
+        Card.MOUNTAIN_DESERT -> MountainDesert()
+        Card.MOUNTAIN_JUNGLE -> MountainJungle()
+        Card.MOUNTAIN_SWAMP -> MountainSwamp()
+        Card.SWAMP_JUNGLE -> SwampJungle()
+        Card.HABSBURG -> Habsburg()
+        Card.HABSBURG_MINING -> HabsburgMining()
+      }
     }
   }
 }
 
 /**
- *
- * @param gen generation of the swamp
  * @param nation True if this has the escalation effect on it
  */
 @Preview
 @Composable
-fun HabsburgMining(gen: Int = 2, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.MINING.color, text = stringResource(R.string.salzvorkommen), generation = gen, nation = nation) {
+fun HabsburgMining( nation: Boolean = false) {
+  SingleDisplayCard(color = CardColor.MINING.color, text = stringResource(R.string.salzvorkommen), generation = 2, nation = nation) {
   }
 }
 
@@ -1029,18 +1025,31 @@ fun Habsburg() {
         .padding(horizontal = 10.dp, vertical = 20.dp)
         .fillMaxWidth()
     ) {
-      Text(stringResource(R.string.habsburg))
+      Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(stringResource(R.string.habsburg))
+        Image(painterResource(R.drawable.habsburg_monarchy__wrinkledflag), "")
+      }
     }
   }
 }
 
 /**
- * Empty or not revealed card
- * @param gen generation of the card
+ * Preview for [Empty]
  */
 @Preview
 @Composable
-fun Empty(gen: Int? = 2) {
+fun EmptyPreview(){
+  Box(Modifier.size(120.dp, 200.dp)) {
+    Empty(Card.HABSBURG_MINING)
+  }
+}
+/**
+ * Empty or not revealed card
+ * @param card card if there is any
+ * @param gen generation of the card
+ */
+@Composable
+fun Empty(card: Card? = null, gen: Int? = 2) {
   Card(
     border = BorderStroke(2.dp, Color.Black),
   ) {
@@ -1048,14 +1057,19 @@ fun Empty(gen: Int? = 2) {
       Image(
         painter = painterResource(id = R.drawable.invasoren), contentDescription = stringResource(R.string.empty), contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize()
       )
-      Column {
+      Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
         Spacer(modifier = Modifier.weight(1f, true))
         Box(modifier = Modifier.weight(7f, true)) {
-          when (gen) {
-            1 -> Text("I", color = Color(201, 49, 42), fontWeight = FontWeight(700))
-            2 -> Text("II", color = Color(201, 49, 42), fontWeight = FontWeight(700))
-            3 -> Text("III", color = Color(201, 49, 42), fontWeight = FontWeight(700))
-            else -> Text("")
+          Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top) {
+            when (gen) {
+              1 -> Text("I", color = Color(201, 49, 42), fontWeight = FontWeight(700))
+              2 -> Text("II", color = Color(201, 49, 42), fontWeight = FontWeight(700))
+              3 -> Text("III", color = Color(201, 49, 42), fontWeight = FontWeight(700))
+              else -> Text("")
+            }
+            if (card == Card.HABSBURG_MINING) {
+              Image(painterResource(R.drawable.habsburg_mining_expedition_flag), "")
+            }
           }
         }
       }
