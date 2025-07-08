@@ -936,7 +936,7 @@ fun DynamicDisplay(card: Card, gen: Int? = null, draggable: Boolean = true, reve
  */
 @Preview
 @Composable
-fun HabsburgMining( nation: Boolean = false) {
+fun HabsburgMining(nation: Boolean = false) {
   SingleDisplayCard(color = CardColor.MINING.color, text = stringResource(R.string.salzvorkommen), generation = 2, nation = nation) {
   }
 }
@@ -988,7 +988,9 @@ fun Desert(gen: Int = 1, nation: Boolean = false) {
 @Preview
 @Composable
 fun Jungle(gen: Int = 1, nation: Boolean = false) {
-  SingleDisplayCard(color = CardColor.JUNGLE.color, text = stringResource(R.string.dschungel), generation = gen, nation = nation) {}
+  SingleDisplayCard(color = CardColor.JUNGLE.color, text = stringResource(R.string.dschungel), generation = gen, nation = nation) {
+    JungleBackground()
+  }
 }
 
 /**
@@ -1038,11 +1040,12 @@ fun Habsburg() {
  */
 @Preview
 @Composable
-fun EmptyPreview(){
+fun EmptyPreview() {
   Box(Modifier.size(120.dp, 200.dp)) {
     Empty(Card.HABSBURG_MINING)
   }
 }
+
 /**
  * Empty or not revealed card
  * @param card card if there is any
@@ -1088,7 +1091,7 @@ fun DesertJungle() {
     text1 = stringResource(R.string.desert),
     text2 = stringResource(R.string.dschungel),
     { DesertBackground() },
-    {}
+    { JungleBackground() }
   )
 }
 
@@ -1133,7 +1136,7 @@ fun MountainJungle() {
     text1 = stringResource(R.string.berg),
     text2 = stringResource(R.string.dschungel),
     { MountainBackground() },
-    {}
+    { JungleBackground() }
   )
 }
 
@@ -1163,7 +1166,7 @@ fun SwampJungle() {
     text1 = stringResource(R.string.sumpf),
     text2 = stringResource(R.string.dschungel),
     { SwampBackground() },
-    {}
+    { JungleBackground() }
   )
 }
 
@@ -1192,7 +1195,12 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier
               .fillMaxWidth()
           ) {
-            Text(text1, fontWeight = FontWeight.Bold)
+            Text(
+              text1, fontWeight = FontWeight.Bold,
+              modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+            )
           }
         }
 
@@ -1206,7 +1214,12 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier
               .fillMaxWidth()
           ) {
-            Text(text2, fontWeight = FontWeight.Bold)
+            Text(
+              text2, fontWeight = FontWeight.Bold,
+              modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
+                .padding(horizontal = 4.dp, vertical = 2.dp)
+            )
           }
         }
       }
@@ -1241,7 +1254,12 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, natio
         ) {
           if (generation != null) Text(text = if (generation == 1) "I" else "II", fontWeight = FontWeight.Bold)
         }
-        Text(text, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(
+          text, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+          modifier = Modifier
+            .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+        )
         if (nation) Box(modifier = Modifier.height(50.dp), contentAlignment = Alignment.Center) {
           Image(
             painter = painterResource(id = R.drawable.nation),
@@ -1485,6 +1503,24 @@ fun PreviewOceanWaveBackground() {
   }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewJungleBackground() {
+  Box(Modifier.size(120.dp, 200.dp)) {
+    JungleBackground()
+  }
+}
+
+@Composable
+fun JungleBackground() {
+  Image(
+    painter = painterResource(R.drawable.jungle),
+    "",
+    contentScale = ContentScale.Crop,
+    modifier = Modifier.fillMaxSize()
+  )
+}
+
 @Composable
 fun DesertBackground() {
   val backgroundColor = Color(0xFFdbac5b) // Light blue background
@@ -1614,163 +1650,6 @@ fun PreviewTriangleWaveBackground() {
         .offset(y = -40.dp)
     ) {
       MountainBackground()
-    }
-  }
-}
-
-private fun DrawScope.drawLeaf(
-  color: Color,
-  position: Offset, // Position of the leaf's base
-  size: Float, // Size of the leaf
-  angle: Float // Rotation angle of the leaf
-) {
-  // Save the current state of the canvas
-  rotate(degrees = angle, pivot = position) {
-    // Define the leaf shape using a Path
-    val path = Path().apply {
-      val leafWidth = size * 0.6f
-      val leafHeight = size
-
-      // Start at the base of the leaf
-      moveTo(position.x, position.y)
-
-      // Draw the left curve of the leaf
-      cubicTo(
-        position.x - leafWidth / 2, position.y - leafHeight / 4,
-        position.x - leafWidth / 4, position.y - leafHeight,
-        position.x, position.y - leafHeight
-      )
-
-      // Draw the right curve of the leaf
-      cubicTo(
-        position.x + leafWidth / 4, position.y - leafHeight,
-        position.x + leafWidth / 2, position.y - leafHeight / 4,
-        position.x, position.y
-      )
-    }
-
-    // Draw the leaf outline
-    drawPath(
-      path = path,
-      color = color,
-      style = Stroke(
-        width = 4f, // Thickness of the leaf outline
-        cap = StrokeCap.Round // Rounded ends for smoother lines
-      )
-    )
-
-    // Draw veins inside the leaf (curved with the leaf shape)
-    drawLeafVeins(color, position, size)
-  }
-}
-
-private fun DrawScope.drawLeafVeins(
-  color: Color,
-  position: Offset, // Position of the leaf's base
-  size: Float // Size of the leaf
-) {
-  val veinColor = color.copy(alpha = 0.8f) // Slightly transparent color for veins
-  val leafHeight = size
-  val leafWidth = size * 0.6f
-
-  // Main central vein (from base to tip)
-  val centralVein = Path().apply {
-    moveTo(position.x, position.y)
-    cubicTo(
-      position.x - leafWidth / 8, position.y - leafHeight / 2,
-      position.x + leafWidth / 8, position.y - leafHeight / 2,
-      position.x, position.y - leafHeight
-    )
-  }
-  drawPath(
-    path = centralVein,
-    color = veinColor,
-    style = Stroke(
-      width = 3f, // Thickness of the central vein
-      cap = StrokeCap.Round
-    )
-  )
-
-  // Secondary veins (curved with the leaf shape)
-  val numVeins = 5 // Number of secondary veins on each side
-  for (i in 1..numVeins) {
-    val t = i.toFloat() / (numVeins + 1) // Normalized position along the central vein
-
-    // Left side vein
-    val leftVein = Path().apply {
-      moveTo(position.x, position.y - leafHeight * t)
-      cubicTo(
-        position.x - leafWidth / 4, position.y - leafHeight * (t + 0.1f),
-        position.x - leafWidth / 2, position.y - leafHeight * (t - 0.1f),
-        position.x - leafWidth / 2 * (1 - t), position.y - leafHeight * t
-      )
-    }
-    drawPath(
-      path = leftVein,
-      color = veinColor,
-      style = Stroke(
-        width = 2f, // Thickness of the secondary veins
-        cap = StrokeCap.Round
-      )
-    )
-
-    // Right side vein
-    val rightVein = Path().apply {
-      moveTo(position.x, position.y - leafHeight * t)
-      cubicTo(
-        position.x + leafWidth / 4, position.y - leafHeight * (t + 0.1f),
-        position.x + leafWidth / 2, position.y - leafHeight * (t - 0.1f),
-        position.x + leafWidth / 2 * (1 - t), position.y - leafHeight * t
-      )
-    }
-    drawPath(
-      path = rightVein,
-      color = veinColor,
-      style = Stroke(
-        width = 2f, // Thickness of the secondary veins
-        cap = StrokeCap.Round
-      )
-    )
-  }
-}
-
-@Composable
-@Preview
-fun JungleBackgroundPreview() {
-  Box(modifier = Modifier.size(120.dp, 200.dp)) {
-    JungleBackground()
-  }
-}
-
-@Composable
-fun JungleBackground() {
-  val backgroundColor = Color(0xFF72b969)
-  val waveColor = Color(0xFF346c37)
-
-  Canvas(
-    modifier = Modifier
-      .fillMaxSize()
-      .background(backgroundColor)
-  ) {
-    clipRect {
-      val width = size.width
-      val height = size.height
-
-      val progression = listOf(150)
-      var i = 0
-      var h = 0
-      while (h <= height.toInt()) {
-        val currentProg = progression[i]
-        // Draw multiple triangle waves as lines
-        drawLeaf(
-          waveColor,
-          Offset(100f, h.toFloat()),
-          size = 100f,
-          angle = 0f,
-        )
-        h += currentProg
-        i = (i + 1) % progression.size
-      }
     }
   }
 }
