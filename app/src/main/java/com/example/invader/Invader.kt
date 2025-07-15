@@ -69,7 +69,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
@@ -78,7 +77,6 @@ import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
@@ -1405,6 +1403,25 @@ class Deck(nationConfig: NationConfig) {
         deck.addAll(firstColors)
         deck.addAll(secondColors)
         deck.addAll(thirdColors)
+      }
+
+      nationConfig.nation == Nation.Schottland && nationConfig.level >= 2 -> {
+        val everySecond = mutableListOf(Card.DESERT_NATION, Card.JUNGLE_NATION, Card.MOUNTAIN_NATION, Card.SWAMP_NATION)
+        everySecond.shuffle()
+        deck.addAll(firstColors.take(2))
+        deck.addAll(everySecond.take(2))
+        if (nationConfig.level >= 4) {
+          deck.add(thirdColors[0])
+        } else {
+          deck.add(firstColors[2])
+        }
+        deck.add(Card.COAST)
+        deck.add(everySecond[2])
+        if (nationConfig.level >= 4) {
+          deck.addAll(thirdColors.drop(1))
+        } else {
+          deck.addAll(thirdColors)
+        }
       }
 
       else -> {
