@@ -316,7 +316,8 @@ fun CardDisplay(
         if (!immigrationVisible && !russiaVisible) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
         Building(
           cards = buildingCard,
-          addCard = addBuildingCard
+          addCard = addBuildingCard,
+          dealCards = exploreClick,
         )
         if (!immigrationVisible && !russiaVisible) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
         Column(
@@ -745,16 +746,38 @@ fun Immigration(cards: List<Card>, addCard: (Card) -> Unit) {
  * Pile of building cards
  * @param cards list of cards where the first card is the bottom one
  * @param addCard handler that is called when a card is added to this pile
+ * @param dealCards handler for button to continue dealing cards
  */
 @Composable
-fun Building(cards: List<Card>, addCard: (Card) -> Unit) {
-  CardDroppable(addCard) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-      Text(text = stringResource(R.string.cards) + cards.size.toString())
+fun Building(cards: List<Card>, addCard: (Card) -> Unit, dealCards: () -> Unit) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Text(text = stringResource(R.string.cards) + cards.size.toString())
+    CardDroppable(addCard) {
       CardStack(cards)
-      Text(text = stringResource(R.string.building))
+    }
+    Text(text = stringResource(R.string.building))
+    Button(onClick = dealCards) {
+      val color = MaterialTheme.colorScheme.onPrimary
+      Row() {
+        repeat(3) {
+          Box(modifier = Modifier
+            .drawWithCache {
+              val h = size.height
+              val w = size.width
+              val start = (h - 2 * w) / 2
+              val r = RoundedPolygon(vertices = floatArrayOf(w, 1f * start, 0f, 0.5f * h, w, w + w + start, w, w + w + start - 0.1f * w, 0.11f * w, 0.5f * h, w, start + 0.1f * w))
+              val roundedPolygonPath = r
+                .toPath()
+                .asComposePath()
+              onDrawBehind { drawPath(roundedPolygonPath, color = color) }
+            }
+            .width(10.dp)
+            .height(10.dp * 2)
+          )
+        }
+      }
     }
   }
 }
