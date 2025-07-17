@@ -302,26 +302,30 @@ fun CardDisplay(
       Row(
         horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.Top, modifier = Modifier.fillMaxWidth()
       ) {
-        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
-        if (nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && (discardCard.isEmpty() || discardCard.last().gen <= 1))
+        val immigrationVisible =
+          nationConfig.nation == Nation.England && nationConfig.level >= 4 || nationConfig.nation == Nation.England && nationConfig.level == 3 && (discardCard.isEmpty() || discardCard.all { c -> c.gen <= 1 })
+        val russiaVisible = nationConfig.nation == Nation.Russland && nationConfig.level >= 5
+
+        if (!immigrationVisible && !russiaVisible) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        if (immigrationVisible)
           Immigration(
             cards = immigrationCard,
             addCard = addImmigrationCard
           )
         Ravage(cards = ravageCard, addCard = addRavageCard)
-        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        if (!immigrationVisible && !russiaVisible) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
         Building(
           cards = buildingCard,
           addCard = addBuildingCard
         )
-        if (nationConfig.nation != Nation.England || nationConfig.level < 3) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
+        if (!immigrationVisible && !russiaVisible) Splitter(color = MaterialTheme.colorScheme.primary, onClick = exploreClick)
         Column(
           horizontalAlignment = Alignment.End
         ) {
           Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
           InvaderDeckFunctions(openFracturedDialog, openHardWorkingSettlersDialog, openRisingInterestInTheIslandDialog)
         }
-        if (nationConfig.nation == Nation.Russland && nationConfig.level >= 5) {
+        if (russiaVisible) {
           RussiaDeck(cards = russiaHiddenCards, onClick = russiaOnClick, revealed = russiaRevealed)
         }
       }

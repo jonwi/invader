@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
               revealed.value = true
             } else {
               if (!exploreCards.isEmpty()) {
-                if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && (ravageCards.isEmpty() || ravageCards.first().gen == 1)) {
+                if (nationConfig.value.nation == Nation.England && nationConfig.value.level >= 4 || nationConfig.value.nation == Nation.England && nationConfig.value.level == 3 && (immigrationCards.isEmpty() || immigrationCards.first().gen == 1)) {
                   discardCards.addAll(immigrationCards)
                   immigrationCards.removeAll(immigrationCards)
                   immigrationCards.addAll(ravageCards)
@@ -97,6 +97,11 @@ class MainActivity : ComponentActivity() {
             }
 
             list.add(card)
+
+            if (immigrationCards.any { c -> c.gen == 2 } && nationConfig.value.nation == Nation.England && nationConfig.value.level == 3) {
+              discardCards.addAll(immigrationCards)
+              immigrationCards.removeAll(immigrationCards)
+            }
           }
 
           val resetDeck = {
