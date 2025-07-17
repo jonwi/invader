@@ -72,8 +72,8 @@ class MainActivity : ComponentActivity() {
                   immigrationCards.addAll(ravageCards)
                 } else {
                   discardCards.addAll(ravageCards.filter { c -> c != Card.HABSBURG_MINING })
-                  ravageCards.removeAll(ravageCards.filter { c -> c != Card.HABSBURG_MINING })
                 }
+                ravageCards.removeAll(ravageCards.filter { c -> c != Card.HABSBURG_MINING })
                 ravageCards.addAll(buildingCards)
                 buildingCards.removeAll(buildingCards)
                 buildingCards.add(exploreCards.last())
