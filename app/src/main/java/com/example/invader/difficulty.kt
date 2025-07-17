@@ -2,9 +2,11 @@ package com.example.invader
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -24,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,16 +41,18 @@ import kotlin.math.min
  * View model for difficulty randomization
  */
 class DifficultyViewModel : ViewModel() {
-  val initialLow = 1
-  val initialHigh = 12
-  var randomized by mutableStateOf(randomizeSetup(initialLow, initialHigh, usesNation = true, usesScenarios = true))
+  val initialLow = 6
+  val initialHigh = 9
+  var randomized by mutableStateOf(randomizeSetup(initialLow, initialHigh, usesNation = true, usesScenarios = false))
 }
 
 /**
  * Composable that lets the user randomize the setup of the game by selecting a range of difficulty and of nation and/or scenarios should be used.
  */
 @Composable
-@Preview
+@Preview(
+  device = "spec:width=411dp,height=700dp,dpi=420,isRound=false,chinSize=0dp,orientation=landscape"
+)
 fun Difficulty(viewModel: DifficultyViewModel = viewModel()) {
 
   Row(
@@ -55,13 +60,26 @@ fun Difficulty(viewModel: DifficultyViewModel = viewModel()) {
       .padding(30.dp)
       .fillMaxWidth(), horizontalArrangement = Arrangement.End
   ) {
-    Setup(viewModel.randomized)
+    Box(modifier = Modifier.weight(3f)) {
+      Setup(viewModel.randomized)
+    }
     Spacer(modifier = Modifier.width(30.dp))
-    DifficultySelector(viewModel.initialLow, viewModel.initialHigh, initNation = true, initScenario = true) { low, high, usesNation, usesScenario ->
-      viewModel.randomized = randomizeSetup(low, high, usesNation, usesScenario)
+    Box() {
+      DifficultySelector(viewModel.initialLow, viewModel.initialHigh, initNation = true, initScenario = false) { low, high, usesNation, usesScenario ->
+        viewModel.randomized = randomizeSetup(low, high, usesNation, usesScenario)
+      }
     }
   }
 
+}
+
+/**
+ * Preview of [Setup]
+ */
+@Preview
+@Composable
+fun SetupPreview() {
+  Setup(Triple(NationConfig(Nation.England, 3), null, 3))
 }
 
 /**
@@ -70,16 +88,26 @@ fun Difficulty(viewModel: DifficultyViewModel = viewModel()) {
  */
 @Composable
 fun Setup(setup: Triple<NationConfig?, Scenario?, Int?>) {
-  Column {
+  Row(modifier = Modifier.fillMaxHeight()) {
     if (setup.first != null) {
-      Text(stringResource(R.string.nation) + ": " + stringResource(setup.first!!.nation.descId) + " " + setup.first!!.level)
-      Image(painterResource(setup.first!!.nation.flag), stringResource(setup.first!!.nation.descId))
+      Image(
+        painterResource(setup.first!!.nation.flag),
+        stringResource(setup.first!!.nation.descId),
+        modifier = Modifier.weight(1f),
+        contentScale = ContentScale.FillWidth,
+      )
     }
-    if (setup.second != null) {
-      Text(stringResource(R.string.scenario) + ": " + stringResource(setup.second!!.desc))
-    }
-    if (setup.third != null) {
-      Text(stringResource(R.string.difficulty) + ": ${setup.third!!}")
+    Column(modifier = Modifier.weight(1f)) {
+      if (setup.first != null) {
+        Text(stringResource(R.string.nation) + ": " + stringResource(setup.first!!.nation.descId))
+        Text(stringResource(R.string.level) + ": " + setup.first!!.level)
+      }
+      if (setup.second != null) {
+        Text(stringResource(R.string.scenario) + ": " + stringResource(setup.second!!.desc))
+      }
+      if (setup.third != null) {
+        Text(stringResource(R.string.difficulty) + ": ${setup.third!!}")
+      }
     }
   }
 }
