@@ -203,6 +203,23 @@ class MainActivity : ComponentActivity() {
                         }
                       }
 
+                      Nation.HabsburgMining -> {
+                        if (exploreCards[exploreCards.size - 1] == Card.HABSBURG_MINING) {
+                          exploreCards.removeAt(exploreCards.size - 2)
+                        } else {
+                          exploreCards.removeAt(exploreCards.size - 1)
+                        }
+                      }
+
+                      Nation.Brandenburg -> {
+                        val next = exploreCards[exploreCards.size - 1]
+                        if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) {
+                          exploreCards.removeAt(exploreCards.size - 2)
+                        } else {
+                          exploreCards.removeAt(exploreCards.size - 1)
+                        }
+                      }
+
                       else -> exploreCards.removeAt(exploreCards.size - 1)
                     }
                   })
