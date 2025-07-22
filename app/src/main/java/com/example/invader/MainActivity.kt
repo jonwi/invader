@@ -114,8 +114,7 @@ class MainActivity : ComponentActivity() {
 
             deck.value = Deck(nationConfig.value)
             exploreCards.addAll(deck.value.cards)
-            if (nationConfig.value.nation == Nation.Schweden && nationConfig.value.level >= 4)
-              discardCards.add(exploreCards.removeAt(exploreCards.lastIndex))
+            if (nationConfig.value.nation == Nation.Schweden && nationConfig.value.level >= 4) discardCards.add(exploreCards.removeAt(exploreCards.lastIndex))
             if (nationConfig.value.nation == Nation.Russland && nationConfig.value.level >= 5) {
               russiaHiddenCards.addAll(listOf(deck.value.thirdRemoved, deck.value.secondRemoved))
             }
@@ -127,17 +126,14 @@ class MainActivity : ComponentActivity() {
             nationConfig.value = nc
           }
 
-          Scaffold(
-            bottomBar = {
-              BottomBar(screen.value) { s -> screen.value = s }
-            }
-          ) { innerPadding ->
+          Scaffold(bottomBar = {
+            BottomBar(screen.value) { s -> screen.value = s }
+          }) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
               when (screen.value) {
                 Screens.Difficulty -> Difficulty()
                 Screens.Randomizer -> Randomizer()
-                Screens.Invaders -> Invader(
-                  resetDeck = resetDeck,
+                Screens.Invaders -> Invader(resetDeck = resetDeck,
                   discardCard = discardCards.toList(),
                   ravageCard = ravageCards.toList(),
                   exploreCard = exploreCards.toList(),
@@ -188,9 +184,28 @@ class MainActivity : ComponentActivity() {
                     }
                   },
                   risingInterestInTheIslandHandler = {
-                    exploreCards.removeAt(exploreCards.size - 1)
-                  }
-                )
+                    when (nationConfig.value.nation) {
+                      Nation.Schottland -> {
+                        if (nationConfig.value.level >= 2) {
+                          // Scotland order: 1-1-2-2-X-C-2-3-3-3-3-(3)
+                          val next = exploreCards[exploreCards.size - 1]
+                          if (next == Card.COAST) { // do not remove Coast
+                            exploreCards.removeAt(exploreCards.size - 2)
+                          } else if (next.gen == 1) { // do not remove X when X == 1
+                            exploreCards.removeAt(exploreCards.size - 3)
+                          } else if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) { // do not remove X when X == 3
+                            exploreCards.removeAt(exploreCards.size - 3)
+                          } else {
+                            exploreCards.removeAt(exploreCards.size - 1)
+                          }
+                        } else {
+                          exploreCards.removeAt(exploreCards.size - 1)
+                        }
+                      }
+
+                      else -> exploreCards.removeAt(exploreCards.size - 1)
+                    }
+                  })
               }
             }
           }
@@ -204,9 +219,7 @@ class MainActivity : ComponentActivity() {
  * Represents a screen of the app
  */
 enum class Screens {
-  Invaders,
-  Randomizer,
-  Difficulty,
+  Invaders, Randomizer, Difficulty,
 }
 
 /**
@@ -227,9 +240,7 @@ fun BottomBarPreview() {
 @Composable
 fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
   BottomAppBar(
-    containerColor = MaterialTheme.colorScheme.primaryContainer,
-    contentColor = MaterialTheme.colorScheme.primary,
-    modifier = Modifier.height(40.dp)
+    containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.primary, modifier = Modifier.height(40.dp)
   ) {
     Row(
       modifier = Modifier
@@ -271,9 +282,7 @@ fun BottomBar(screen: Screens, onChange: (Screens) -> Unit) {
           .background(if (screen == Screens.Invaders) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer)
       ) {
         Icon(
-          Icons.Filled.Home,
-          contentDescription = "Invaders",
-          tint = if (screen == Screens.Invaders) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+          Icons.Filled.Home, contentDescription = "Invaders", tint = if (screen == Screens.Invaders) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
         )
       }
     }
