@@ -114,4 +114,5 @@
     <string name="rising_interest_description">Return the top card of the Invader Deck to the box.</string>
     <string name="rising_interest_in_the_island">Rising Interest in the Island</string>
     <string name="habsburg_mining">Habsburg Mining Expedition</string>
+    <string name="salzvorkommen">Salt deposits</string>
 </resources>
