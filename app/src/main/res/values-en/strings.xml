@@ -115,4 +115,6 @@
     <string name="rising_interest_in_the_island">Rising Interest in the Island</string>
     <string name="habsburg_mining">Habsburg Mining Expedition</string>
     <string name="salzvorkommen">Salt deposits</string>
+    <string name="top_invader_card">Top Invader Card</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

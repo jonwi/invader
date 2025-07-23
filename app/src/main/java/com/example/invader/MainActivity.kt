@@ -33,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.invader.ui.theme.AppTheme
+import kotlin.random.Random
 
 /**
  * Main entry point of the app
@@ -126,6 +127,70 @@ class MainActivity : ComponentActivity() {
             nationConfig.value = nc
           }
 
+          val visionsOfAShiftingFutureHandler = {
+            if (Random.nextFloat() < .5 && exploreCards.size >= 2) {
+              val nextCard = exploreCards[exploreCards.size - 1]
+              exploreCards[exploreCards.size - 1] = exploreCards[exploreCards.size - 2]
+              exploreCards[exploreCards.size - 2] = nextCard
+            }
+          }
+
+          val risingInterestInTheIslandHandler: () -> Unit = {
+            when (nationConfig.value.nation) {
+              Nation.Schottland -> {
+                if (nationConfig.value.level >= 2) {
+                  // Scotland order: 1-1-2-2-X-C-2-3-3-3-3-(3)
+                  val next = exploreCards[exploreCards.size - 1]
+                  if (next == Card.COAST) { // do not remove Coast
+                    exploreCards.removeAt(exploreCards.size - 2)
+                  } else if (next.gen == 1) { // do not remove X when X == 1
+                    exploreCards.removeAt(exploreCards.size - 3)
+                  } else if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) { // do not remove X when X == 3
+                    exploreCards.removeAt(exploreCards.size - 3)
+                  } else {
+                    exploreCards.removeAt(exploreCards.size - 1)
+                  }
+                } else {
+                  exploreCards.removeAt(exploreCards.size - 1)
+                }
+              }
+
+              Nation.HabsburgMining -> {
+                if (exploreCards[exploreCards.size - 1] == Card.HABSBURG_MINING) {
+                  exploreCards.removeAt(exploreCards.size - 2)
+                } else {
+                  exploreCards.removeAt(exploreCards.size - 1)
+                }
+              }
+
+              Nation.Brandenburg -> {
+                val next = exploreCards[exploreCards.size - 1]
+                if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) {
+                  exploreCards.removeAt(exploreCards.size - 2)
+                } else {
+                  exploreCards.removeAt(exploreCards.size - 1)
+                }
+              }
+
+              else -> exploreCards.removeAt(exploreCards.size - 1)
+            }
+          }
+
+          val hardWorkingSettlersHandler = {
+            for (card in exploreCards) {
+              if (card.gen == 2) {
+                exploreCards.remove(card)
+                break
+              }
+            }
+            for (card in exploreCards) {
+              if (card.gen == 3) {
+                exploreCards.remove(card)
+                break
+              }
+            }
+          }
+
           Scaffold(bottomBar = {
             BottomBar(screen.value) { s -> screen.value = s }
           }) { innerPadding ->
@@ -133,7 +198,8 @@ class MainActivity : ComponentActivity() {
               when (screen.value) {
                 Screens.Difficulty -> Difficulty()
                 Screens.Randomizer -> Randomizer()
-                Screens.Invaders -> Invader(resetDeck = resetDeck,
+                Screens.Invaders -> Invader(
+                  resetDeck = resetDeck,
                   discardCard = discardCards.toList(),
                   ravageCard = ravageCards.toList(),
                   exploreCard = exploreCards.toList(),
@@ -169,60 +235,10 @@ class MainActivity : ComponentActivity() {
                     exploreCards.add(card)
                   },
                   discardCards = discardCards,
-                  hardWorkingSettlersHandler = {
-                    for (card in exploreCards) {
-                      if (card.gen == 2) {
-                        exploreCards.remove(card)
-                        break
-                      }
-                    }
-                    for (card in exploreCards) {
-                      if (card.gen == 3) {
-                        exploreCards.remove(card)
-                        break
-                      }
-                    }
-                  },
-                  risingInterestInTheIslandHandler = {
-                    when (nationConfig.value.nation) {
-                      Nation.Schottland -> {
-                        if (nationConfig.value.level >= 2) {
-                          // Scotland order: 1-1-2-2-X-C-2-3-3-3-3-(3)
-                          val next = exploreCards[exploreCards.size - 1]
-                          if (next == Card.COAST) { // do not remove Coast
-                            exploreCards.removeAt(exploreCards.size - 2)
-                          } else if (next.gen == 1) { // do not remove X when X == 1
-                            exploreCards.removeAt(exploreCards.size - 3)
-                          } else if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) { // do not remove X when X == 3
-                            exploreCards.removeAt(exploreCards.size - 3)
-                          } else {
-                            exploreCards.removeAt(exploreCards.size - 1)
-                          }
-                        } else {
-                          exploreCards.removeAt(exploreCards.size - 1)
-                        }
-                      }
-
-                      Nation.HabsburgMining -> {
-                        if (exploreCards[exploreCards.size - 1] == Card.HABSBURG_MINING) {
-                          exploreCards.removeAt(exploreCards.size - 2)
-                        } else {
-                          exploreCards.removeAt(exploreCards.size - 1)
-                        }
-                      }
-
-                      Nation.Brandenburg -> {
-                        val next = exploreCards[exploreCards.size - 1]
-                        if (next.gen == 3 && exploreCards.any { c -> c.gen == 2 }) {
-                          exploreCards.removeAt(exploreCards.size - 2)
-                        } else {
-                          exploreCards.removeAt(exploreCards.size - 1)
-                        }
-                      }
-
-                      else -> exploreCards.removeAt(exploreCards.size - 1)
-                    }
-                  })
+                  hardWorkingSettlersHandler = hardWorkingSettlersHandler,
+                  risingInterestInTheIslandHandler = risingInterestInTheIslandHandler,
+                  visionsOfAShiftingFutureHandler = visionsOfAShiftingFutureHandler,
+                )
               }
             }
           }

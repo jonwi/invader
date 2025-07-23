@@ -110,4 +110,6 @@
     <string name="coastline">Küste</string>
     <string name="fragment">Fragment</string>
     <string name="opposing">Gegenüber</string>
+    <string name="top_invader_card">Oberste Invasoren Karte</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

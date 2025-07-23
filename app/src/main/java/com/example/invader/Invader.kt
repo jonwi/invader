@@ -39,6 +39,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -148,11 +149,13 @@ fun Invader(
   discardCards: List<Card>,
   hardWorkingSettlersHandler: () -> Unit,
   risingInterestInTheIslandHandler: () -> Unit,
+  visionsOfAShiftingFutureHandler: () -> Unit,
 ) {
   val openNationDialog = remember { mutableStateOf(false) }
   var openFracturedDialog by remember { mutableStateOf(false) }
   var openHardWorkingSettlersDialog by remember { mutableStateOf(false) }
   var openRisingInterestInTheIslandDialog by remember { mutableStateOf(false) }
+  var openVisionsOfAShiftingFutureDialog by remember { mutableStateOf(false) }
 
   val openNationDialogFunc = {
     openNationDialog.value = true
@@ -189,6 +192,10 @@ fun Invader(
     openRisingInterestInTheIslandDialog -> {
       RisingInterestInTheIslandDialog(onAccept = risingInterestInTheIslandHandler, onDismiss = { openRisingInterestInTheIslandDialog = false })
     }
+
+    openVisionsOfAShiftingFutureDialog -> {
+      VisionsOfShiftingFutureDialog(onAccept = visionsOfAShiftingFutureHandler, onDismiss = { openVisionsOfAShiftingFutureDialog = false }, card = exploreCard[exploreCard.size - 1])
+    }
   }
   Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxHeight()) {
     CardDisplay(
@@ -211,7 +218,8 @@ fun Invader(
       russiaOnClick = russiaOnClick,
       openFracturedDialog = openFracturedDialogFunc,
       openHardWorkingSettlersDialog = { openHardWorkingSettlersDialog = true },
-      openRisingInterestInTheIslandDialog = { openRisingInterestInTheIslandDialog = true }
+      openRisingInterestInTheIslandDialog = { openRisingInterestInTheIslandDialog = true },
+      openVisionsHandler = { openVisionsOfAShiftingFutureDialog = true }
     )
   }
 }
@@ -242,6 +250,7 @@ fun CardDisplayPreview() {
       {},
       listOf(Card.EMPTY),
       false,
+      {},
       {},
       {},
       {},
@@ -292,6 +301,7 @@ fun CardDisplay(
   openFracturedDialog: () -> Unit,
   openHardWorkingSettlersDialog: () -> Unit,
   openRisingInterestInTheIslandDialog: () -> Unit,
+  openVisionsHandler: () -> Unit,
 ) {
 
   Column(
@@ -324,7 +334,7 @@ fun CardDisplay(
           horizontalAlignment = Alignment.End
         ) {
           Explore(cards = exploreCard, onClick = exploreClick, revealed, addExploreCard)
-          InvaderDeckFunctions(openFracturedDialog, openHardWorkingSettlersDialog, openRisingInterestInTheIslandDialog)
+          InvaderDeckFunctions(openFracturedDialog, openHardWorkingSettlersDialog, openRisingInterestInTheIslandDialog, openVisionsHandler = openVisionsHandler)
         }
         if (russiaVisible) {
           RussiaDeck(cards = russiaHiddenCards, onClick = russiaOnClick, revealed = russiaRevealed)
@@ -338,11 +348,28 @@ fun CardDisplay(
  * @param fracturedHandler  onClick for fractured
  * @param openHardWorkingSettlersDialog onClick for hard working settlers
  * @param openRisingInterestInTheIslandDialog onClick for rising interest in the island dialog
+ * @param openVisionsHandler opens dialog vor visions of a shifting future
  */
 @Composable
-fun InvaderDeckFunctions(fracturedHandler: () -> Unit, openHardWorkingSettlersDialog: () -> Unit, openRisingInterestInTheIslandDialog: () -> Unit) {
-  Row(
-  ) {
+fun InvaderDeckFunctions(fracturedHandler: () -> Unit, openHardWorkingSettlersDialog: () -> Unit, openRisingInterestInTheIslandDialog: () -> Unit, openVisionsHandler: () -> Unit) {
+  Row {
+    IconButton(
+      onClick = openVisionsHandler,
+      modifier = Modifier
+        .size(32.dp)
+        .clip(CircleShape)
+    ) {
+      Image(
+        painter = painterResource(id = R.drawable.fractured),
+        contentDescription = "Fractured Image",
+        modifier = Modifier.size(32.dp),
+        contentScale = ContentScale.Crop
+      )
+      Icon(
+        Icons.Default.RemoveRedEye,
+        "VisionsOfAShiftingFuture"
+      )
+    }
     IconButton(
       onClick = fracturedHandler,
       modifier = Modifier
@@ -387,7 +414,7 @@ fun InvaderDeckFunctions(fracturedHandler: () -> Unit, openHardWorkingSettlersDi
 @Composable
 @Preview
 fun InvaderDeckFunctionsPreview() {
-  InvaderDeckFunctions({}, {}, {})
+  InvaderDeckFunctions({}, {}, {}, {})
 }
 
 /**
@@ -525,6 +552,42 @@ fun NationDialog(
 }
 
 /**
+ * Dialog for Unique Power Visions of Shifting Future
+ *
+ * @param card top invader card
+ * @param onAccept onAccept
+ * @param onDismiss onDismiss
+ */
+@Composable
+fun VisionsOfShiftingFutureDialog(card: Card, onAccept: () -> Unit, onDismiss: () -> Unit) {
+  AlertDialog(
+    properties = DialogProperties(usePlatformDefaultWidth = false), modifier = Modifier.fillMaxWidth(.8f),
+    title = {
+      Text(text = stringResource(R.string.top_invader_card))
+    },
+    text = {
+      DynamicDisplay(card, draggable = false)
+    },
+    confirmButton = {
+      Button(
+        onClick = {
+          onAccept()
+          onDismiss()
+        }
+      ) {
+        Text(stringResource(R.string.confirm))
+      }
+    },
+    dismissButton = {
+      Button(onClick = onDismiss) {
+        Text(stringResource(R.string.abort))
+      }
+    },
+    onDismissRequest = onDismiss,
+  )
+}
+
+/**
  * Dialog for Fractured days split the sky
  *
  * @param cards list of cards to show
@@ -540,7 +603,7 @@ fun FracturedDialog(cards: List<Card>, fracturedHandler: (Card) -> Unit, onDismi
       Text(text = "Exchange Invader Card")
     },
     text = {
-      LazyRow() {
+      LazyRow {
         itemsIndexed(cards) { index, card ->
           Box(
             modifier = Modifier
@@ -564,12 +627,12 @@ fun FracturedDialog(cards: List<Card>, fracturedHandler: (Card) -> Unit, onDismi
           onDismiss()
         }
       ) {
-        Text("Confirm")
+        Text(stringResource(R.string.confirm))
       }
     },
     dismissButton = {
       Button(onClick = onDismiss) {
-        Text("Dismiss")
+        Text(stringResource(R.string.abort))
       }
     },
     onDismissRequest = onDismiss,
@@ -652,7 +715,7 @@ fun RisingInterestInTheIslandDialog(onAccept: () -> Unit, onDismiss: () -> Unit)
 @Preview
 @Composable
 fun Splitter(width: Dp = 20.dp, color: Color = Color.Black, onClick: () -> Unit = {}) {
-  Column() {
+  Column {
     Text("")
     Column(
       modifier = Modifier
@@ -760,7 +823,7 @@ fun Building(cards: List<Card>, addCard: (Card) -> Unit, dealCards: () -> Unit) 
     Text(text = stringResource(R.string.building))
     Button(onClick = dealCards) {
       val color = MaterialTheme.colorScheme.onPrimary
-      Row() {
+      Row {
         repeat(3) {
           Box(modifier = Modifier
             .drawWithCache {
@@ -1203,7 +1266,7 @@ fun SwampJungle() {
  * @param text2 text of the second biome
  */
 @Composable
-fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String, background1: @Composable() () -> Unit, background2: @Composable() () -> Unit) {
+fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String, background1: @Composable () -> Unit, background2: @Composable () -> Unit) {
   Card(
     border = BorderStroke(2.dp, Color.Black), modifier = Modifier.size(width = 120.dp, height = 200.dp),
   ) {
@@ -1261,7 +1324,7 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
  * @param nation True if this contains the escalation effect
  */
 @Composable
-fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, nation: Boolean = false, background: @Composable() (() -> Unit)) {
+fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, nation: Boolean = false, background: @Composable (() -> Unit)) {
   Card(
     border = BorderStroke(2.dp, Color.Black),
     colors = CardDefaults.cardColors(
@@ -1691,7 +1754,7 @@ fun PreviewTriangleWaveBackground() {
       Modifier
         .size(120.dp, 200.dp)
         .rotate(90f)
-        .offset(y = -40.dp)
+        .offset(y = (-40).dp)
     ) {
       MountainBackground()
     }
