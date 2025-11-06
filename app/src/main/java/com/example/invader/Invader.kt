@@ -1284,7 +1284,7 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
               .fillMaxWidth()
           ) {
             Text(
-              text1, fontWeight = FontWeight.Bold,
+              text1, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary,
               modifier = Modifier
                 .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
                 .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -1303,7 +1303,7 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
               .fillMaxWidth()
           ) {
             Text(
-              text2, fontWeight = FontWeight.Bold,
+              text2, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary,
               modifier = Modifier
                 .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
                 .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -1311,7 +1311,7 @@ fun DoubleDisplayCard(color1: Color, color2: Color, text1: String, text2: String
           }
         }
       }
-      Text(text = "III", fontWeight = FontWeight.Bold)
+      Text(text = "III", fontWeight = FontWeight.Bold, color = Color.Black)
     }
   }
 }
@@ -1340,10 +1340,10 @@ fun SingleDisplayCard(color: Color, text: String, generation: Int? = null, natio
         Column(
           horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom, modifier = Modifier.height(50.dp)
         ) {
-          if (generation != null) Text(text = if (generation == 1) "I" else "II", fontWeight = FontWeight.Bold)
+          if (generation != null) Text(text = if (generation == 1) "I" else "II", fontWeight = FontWeight.Bold, color = Color.Black)
         }
         Text(
-          text, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+          text, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary,
           modifier = Modifier
             .background(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(9.dp))
             .padding(horizontal = 4.dp, vertical = 2.dp)
